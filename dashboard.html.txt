@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAF Campaign Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Auth Check -->
+    <script>
+        if (localStorage.getItem('raf_logged_in') !== 'true' && 
+            sessionStorage.getItem('raf_logged_in') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+                <span>RAF CMS</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">Dashboard</span>
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Pipeline Stages</span>
+                <a href="#" class="nav-item" data-view="brands">
+                    <i class="fas fa-building"></i>
+                    <span>All Brands</span>
+                    <span class="badge" id="badge-brands">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="hot">
+                    <i class="fas fa-fire"></i>
+                    <span>Hot Brands</span>
+                    <span class="badge hot" id="badge-hot">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="warm">
+                    <i class="fas fa-temperature-half"></i>
+                    <span>Warm Brands</span>
+                    <span class="badge warm" id="badge-warm">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="lost">
+                    <i class="fas fa-heart-crack"></i>
+                    <span>Lost Brands</span>
+                    <span class="badge lost" id="badge-lost">0</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Campaigns</span>
+                <a href="#" class="nav-item" data-view="converted">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Converted</span>
+                    <span class="badge converted" id="badge-converted">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="running">
+                    <i class="fas fa-play-circle"></i>
+                    <span>Running</span>
+                    <span class="badge running" id="badge-running">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="live">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>Live</span>
+                    <span class="badge live" id="badge-live">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="invoice">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Invoice Stage</span>
+                    <span class="badge invoice" id="badge-invoice">0</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Settings</span>
+                <a href="#" class="nav-item" data-view="team">
+                    <i class="fas fa-users"></i>
+                    <span>Team Members</span>
+                </a>
+                <a href="#" class="nav-item" id="airtable-settings">
+                    <i class="fas fa-database"></i>
+                    <span>Airtable Sync</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <img src="https://ui-avatars.com/api/?name=RAF+User&background=6366f1&color=fff" alt="User" id="user-avatar">
+                <div class="user-details">
+                    <span class="user-name" id="current-user">RAF User</span>
+                    <span class="user-role">Team Member</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="global-search" placeholder="Search brands, campaigns...">
+            </div>
+            <div class="top-bar-actions">
+                <button class="btn btn-primary" id="add-brand-btn">
+                    <i class="fas fa-plus"></i>
+                    Add Brand
+                </button>
+                <div class="user-profile" id="header-profile">
+                    <img src="https://ui-avatars.com/api/?name=RAF+User&background=6366f1&color=fff" alt="User">
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard View -->
+        <section id="view-dashboard" class="view active">
+            <div class="view-header">
+                <h1>Analytics Dashboard</h1>
+                <p>Overview of your brand pipeline and campaigns</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-total">0</span>
+                        <span class="stat-label">Total Brands</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-hot">0</span>
+                        <span class="stat-label">Hot Brands</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-campaigns">0</span>
+                        <span class="stat-label">Active Campaigns</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-heart-crack"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-lost">0</span>
+                        <span class="stat-label">Lost Brands</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-retainer">0</span>
+                        <span class="stat-label">Retainers</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon teal">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-conversion">0%</span>
+                        <span class="stat-label">Conversion Rate</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-charts">
+                <div class="chart-card">
+                    <h3>Pipeline Distribution</h3>
+                    <div class="pipeline-bars" id="pipeline-bars"></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list" id="activity-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brands View -->
+        <section id="view-brands" class="view">
+            <div class="view-header">
+                <h1>All Brands</h1>
+                <p>Master list of all brands in the system</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-brands">
+                    <thead>
+                        <tr>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>POC Number</th>
+                            <th>POC Email</th>
+                            <th>Budget Status</th>
+                            <th>Status</th>
+                            <th>Brand Tool</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-brands"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Hot Brands View -->
+        <section id="view-hot" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-fire"></i> Hot Brands</h1>
+                <p>High-priority leads requiring immediate attention</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-hot">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>POC Number</th>
+                            <th>POC Email</th>
+                            <th>Budget</th>
+                            <th>Pipeline Status</th>
+                            <th>Aflog POC</th>
+                            <th>Month Added</th>
+                            <th>Task Assignee</th>
+                            <th>Brand Tool</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-hot"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Warm Brands View -->
+        <section id="view-warm" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-temperature-half"></i> Warm Brands</h1>
+                <p>Brands showing interest but not yet hot</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-warm">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>POC Number</th>
+                            <th>POC Email</th>
+                            <th>Budget</th>
+                            <th>Pipeline Status</th>
+                            <th>Aflog POC</th>
+                            <th>Task Assignee</th>
+                            <th>Brand Tool</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-warm"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Lost Brands View -->
+        <section id="view-lost" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-heart-crack"></i> Lost Brands</h1>
+                <p>Brands that didn't convert</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-lost">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>POC Email</th>
+                            <th>Budget</th>
+                            <th>Comments</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-lost"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Converted View -->
+        <section id="view-converted" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-exchange-alt"></i> Converted to Campaign</h1>
+                <p>Brands that have been converted</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-converted">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>POC Email</th>
+                            <th>Budget</th>
+                            <th>Campaign Name</th>
+                            <th>Pipeline Status</th>
+                            <th>Aflog POC</th>
+                            <th>Task Assignee</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-converted"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Campaign Running View -->
+        <section id="view-running" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-play-circle"></i> Campaign Running</h1>
+                <p>Active campaigns currently in progress</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-running">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>POC Name</th>
+                            <th>Campaign Name</th>
+                            <th>Current Status</th>
+                            <th>Retainer</th>
+                            <th>Aflog POC</th>
+                            <th>Task Assignee</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-running"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Campaign Live View -->
+        <section id="view-live" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-broadcast-tower"></i> Campaign Live</h1>
+                <p>Campaigns currently live with metrics</p>
+            </div>
+            <div class="campaigns-grid" id="campaigns-grid"></div>
+        </section>
+
+        <!-- Invoice Stage View -->
+        <section id="view-invoice" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-file-invoice-dollar"></i> Invoice Stage</h1>
+                <p>Campaigns pending invoicing</p>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-invoice">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Brand Name</th>
+                            <th>Campaign Name</th>
+                            <th>POC Email</th>
+                            <th>Campaign Closed At</th>
+                            <th>Invoiced</th>
+                            <th>Invoice Status</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-invoice"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Team View -->
+        <section id="view-team" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-users"></i> Team Members</h1>
+                <p>Manage your team and task assignments</p>
+            </div>
+            <div class="team-grid" id="team-grid"></div>
+        </section>
+    </main>
+
+    <!-- Add Brand Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="brand-modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Brand</h2>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="brand-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="brand-name">Brand Name *</label>
+                        <input type="text" id="brand-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="poc-name">POC Name *</label>
+                        <input type="text" id="poc-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="poc-number">POC Number</label>
+                        <input type="tel" id="poc-number">
+                    </div>
+                    <div class="form-group">
+                        <label for="poc-email">POC Email *</label>
+                        <input type="email" id="poc-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget-status">Budget Status</label>
+                        <select id="budget-status">
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="brand-status">Status</label>
+                        <select id="brand-status">
+                            <option value="Hot Brands">Hot Brands</option>
+                            <option value="Warm Brands">Warm Brands</option>
+                            <option value="Lost Brands">Lost Brands</option>
+                            <option value="Converted to Campaign">Converted to Campaign</option>
+                            <option value="Campaign Running">Campaign Running</option>
+                            <option value="Campaign Live">Campaign Live</option>
+                            <option value="Invoice Stage">Invoice Stage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pipeline-status">Pipeline Status</label>
+                        <select id="pipeline-status">
+                            <option value="Initial Talks">Initial Talks</option>
+                            <option value="Requirement Received">Requirement Received</option>
+                            <option value="Proposal Sent">Proposal Sent</option>
+                            <option value="Conversion Talks">Conversion Talks</option>
+                            <option value="Campaign Stage">Campaign Stage</option>
+                            <option value="Invoice Stage">Invoice Stage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="aflog-poc">Aflog POC</label>
+                        <select id="aflog-poc">
+                            <option value="">Select Team Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-name">Campaign Name</label>
+                        <input type="text" id="campaign-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-assignee">Task Assignee</label>
+                        <select id="task-assignee">
+                            <option value="">Select Team Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="invoice-amount">Invoice Amount (₹)</label>
+                        <input type="number" id="invoice-amount" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoice-status">Invoice Status</label>
+                        <select id="invoice-status">
+                            <option value="">N/A</option>
+                            <option value="Invoice Cleared">Invoice Cleared</option>
+                            <option value="Invoice Delayed">Invoice Delayed</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="brief-comments">Brief/Comments</label>
+                        <textarea id="brief-comments" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="brand-tool">
+                            <span>Has Brand Tool</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="retainer">
+                            <span>Retainer Client</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="invoiced">
+                            <span>Invoiced</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Brand</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Airtable Settings Modal -->
+    <div class="modal-overlay" id="airtable-modal-overlay">
+        <div class="modal" id="airtable-modal">
+            <div class="modal-header">
+                <h2>Airtable Integration</h2>
+                <button class="modal-close" id="airtable-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="airtable-form">
+                <div class="form-group">
+                    <label for="airtable-api-key">Airtable API Key</label>
+                    <input type="password" id="airtable-api-key" placeholder="pat...">
+                    <small>Find this in Airtable → Account → API</small>
+                </div>
+                <div class="form-group">
+                    <label for="airtable-base-id">Base ID</label>
+                    <input type="text" id="airtable-base-id" placeholder="app...">
+                    <small>Find this in your Airtable base URL</small>
+                </div>
+                <div class="form-group">
+                    <label for="airtable-table-name">Table Name</label>
+                    <input type="text" id="airtable-table-name" value="Brands">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="airtable-cancel">Cancel</button>
+                    <button type="button" class="btn btn-outline" id="test-connection">Test Connection</button>
+                    <button type="submit" class="btn btn-primary">Save & Sync</button>
+                </div>
+            </form>
+            <div id="sync-status" class="sync-status"></div>
+        </div>
+    </div>
+
+    <!-- Campaign Details Modal -->
+    <div class="modal-overlay" id="campaign-modal-overlay">
+        <div class="modal modal-large" id="campaign-modal">
+            <div class="modal-header">
+                <h2 id="campaign-modal-title">Campaign Details</h2>
+                <button class="modal-close" id="campaign-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="campaign-details" id="campaign-details"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Action completed successfully</span>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
