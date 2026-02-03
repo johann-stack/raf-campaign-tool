@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAF Campaign Management System</title>
+    <title>Aflog Campaign Management System</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,8 +11,8 @@
 <body>
     <!-- Auth Check -->
     <script>
-        if (localStorage.getItem('raf_logged_in') !== 'true' && 
-            sessionStorage.getItem('raf_logged_in') !== 'true') {
+        if (localStorage.getItem('aflog_logged_in') !== 'true' && 
+            sessionStorage.getItem('aflog_logged_in') !== 'true') {
             window.location.href = 'index.html';
         }
     </script>
@@ -22,7 +22,7 @@
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-rocket"></i>
-                <span>RAF CMS</span>
+                <span>Aflog CMS</span>
             </div>
         </div>
         
@@ -32,6 +32,11 @@
                 <a href="#" class="nav-item active" data-view="dashboard">
                     <i class="fas fa-chart-line"></i>
                     <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-view="my-tasks">
+                    <i class="fas fa-tasks"></i>
+                    <span>My Tasks</span>
+                    <span class="badge task-badge" id="badge-my-tasks">0</span>
                 </a>
             </div>
             
@@ -84,11 +89,19 @@
             </div>
             
             <div class="nav-section">
-                <span class="nav-section-title">Settings</span>
+                <span class="nav-section-title">Team</span>
                 <a href="#" class="nav-item" data-view="team">
                     <i class="fas fa-users"></i>
                     <span>Team Members</span>
                 </a>
+                <a href="#" class="nav-item admin-only" data-view="manage-team">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Manage Team</span>
+                </a>
+            </div>
+            
+            <div class="nav-section">
+                <span class="nav-section-title">Settings</span>
                 <a href="#" class="nav-item" id="airtable-settings">
                     <i class="fas fa-database"></i>
                     <span>Airtable Sync</span>
@@ -102,10 +115,10 @@
         
         <div class="sidebar-footer">
             <div class="user-info">
-                <img src="https://ui-avatars.com/api/?name=RAF+User&background=6366f1&color=fff" alt="User" id="user-avatar">
+                <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User" id="user-avatar">
                 <div class="user-details">
-                    <span class="user-name" id="current-user">RAF User</span>
-                    <span class="user-role">Team Member</span>
+                    <span class="user-name" id="current-user">User</span>
+                    <span class="user-role" id="current-role">Team Member</span>
                 </div>
             </div>
         </div>
@@ -117,15 +130,19 @@
         <header class="top-bar">
             <div class="search-container">
                 <i class="fas fa-search"></i>
-                <input type="text" id="global-search" placeholder="Search brands, campaigns...">
+                <input type="text" id="global-search" placeholder="Search brands, campaigns, tasks...">
             </div>
             <div class="top-bar-actions">
+                <button class="btn btn-secondary" id="add-task-btn">
+                    <i class="fas fa-plus"></i>
+                    Add Task
+                </button>
                 <button class="btn btn-primary" id="add-brand-btn">
                     <i class="fas fa-plus"></i>
                     Add Brand
                 </button>
                 <div class="user-profile" id="header-profile">
-                    <img src="https://ui-avatars.com/api/?name=RAF+User&background=6366f1&color=fff" alt="User">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User">
                 </div>
             </div>
         </header>
@@ -202,6 +219,38 @@
                 <div class="chart-card">
                     <h3>Recent Activity</h3>
                     <div class="activity-list" id="activity-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Tasks View -->
+        <section id="view-my-tasks" class="view">
+            <div class="view-header">
+                <h1><i class="fas fa-tasks"></i> My Tasks</h1>
+                <p>Your personal task board</p>
+            </div>
+            
+            <div class="tasks-board">
+                <div class="task-column">
+                    <div class="task-column-header pending">
+                        <h3><i class="fas fa-clock"></i> To Do</h3>
+                        <span class="task-count" id="count-todo">0</span>
+                    </div>
+                    <div class="task-list" id="tasks-todo"></div>
+                </div>
+                <div class="task-column">
+                    <div class="task-column-header in-progress">
+                        <h3><i class="fas fa-spinner"></i> In Progress</h3>
+                        <span class="task-count" id="count-progress">0</span>
+                    </div>
+                    <div class="task-list" id="tasks-progress"></div>
+                </div>
+                <div class="task-column">
+                    <div class="task-column-header completed">
+                        <h3><i class="fas fa-check-circle"></i> Completed</h3>
+                        <span class="task-count" id="count-completed">0</span>
+                    </div>
+                    <div class="task-list" id="tasks-completed"></div>
                 </div>
             </div>
         </section>
@@ -404,13 +453,123 @@
         <section id="view-team" class="view">
             <div class="view-header">
                 <h1><i class="fas fa-users"></i> Team Members</h1>
-                <p>Manage your team and task assignments</p>
+                <p>Click on a team member to view their tasks and campaigns</p>
             </div>
             <div class="team-grid" id="team-grid"></div>
         </section>
-    </main>
 
-    <!-- Add Brand Modal -->
+        <!-- Manage Team View (Admin Only) -->
+        <section id="view-manage-team" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div>
+                        <h1><i class="fas fa-user-cog"></i> Manage Team</h1>
+                        <p>Add, edit, or remove team members</p>
+                    </div>
+                    <button class="btn btn-primary" id="add-member-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Add Team Member
+                    </button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="table-team">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Tasks</th>
+                            <th>Campaigns</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-team"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Team Member Detail View -->
+        <section id="view-member-detail" class="view">
+            <div class="view-header">
+                <div class="member-detail-header">
+                    <button class="btn btn-secondary back-btn" id="back-to-team">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Team
+                    </button>
+                    <div class="member-info-header">
+                        <img src="" alt="" id="member-detail-avatar" class="member-avatar-large">
+                        <div>
+                            <h1 id="member-detail-name">Member Name</h1>
+                            <p id="member-detail-role">Role</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="member-stats-row">
+                <div class="member-stat-card">
+                    <div class="member-stat-value" id="member-stat-tasks">0</div>
+                    <div class="member-stat-label">Total Tasks</div>
+                </div>
+                <div class="member-stat-card">
+                    <div class="member-stat-value" id="member-stat-pending">0</div>
+                    <div class="member-stat-label">Pending</div>
+                </div>
+                <div class="member-stat-card">
+                    <div class="member-stat-value" id="member-stat-progress">0</div>
+                    <div class="member-stat-label">In Progress</div>
+                </div>
+                <div class="member-stat-card">
+                    <div class="member-stat-value" id="member-stat-completed">0</div>
+                    <div class="member-stat-label">Completed</div>
+                </div>
+                <div class="member-stat-card">
+                    <div class="member-stat-value" id="member-stat-campaigns">0</div>
+                    <div class="member-stat-label">Campaigns</div>
+                </div>
+            </div>
+
+            <div class="member-detail-content">
+                <div class="detail-section">
+                    <h3><i class="fas fa-tasks"></i> Tasks</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Brand</th>
+                                    <th>Status</th>
+                                    <th>Due Date</th>
+                                    <th>Priority</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-tasks-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3><i class="fas fa-bullhorn"></i> Assigned Campaigns</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Brand</th>
+                                    <th>Campaign</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-campaigns-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+ <!-- Add Brand Modal -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="brand-modal">
             <div class="modal-header">
@@ -527,6 +686,125 @@
         </div>
     </div>
 
+    <!-- Add Task Modal -->
+    <div class="modal-overlay" id="task-modal-overlay">
+        <div class="modal" id="task-modal">
+            <div class="modal-header">
+                <h2 id="task-modal-title">Add New Task</h2>
+                <button class="modal-close" id="task-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="task-form">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="task-title">Task Title *</label>
+                        <input type="text" id="task-title" required placeholder="What needs to be done?">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="task-description">Description</label>
+                        <textarea id="task-description" rows="3" placeholder="Add more details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-brand">Related Brand</label>
+                        <select id="task-brand">
+                            <option value="">No brand selected</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-assigned-to">Assign To</label>
+                        <select id="task-assigned-to">
+                            <option value="">Assign to myself</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-status">Status</label>
+                        <select id="task-status">
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date</label>
+                        <input type="date" id="task-due-date">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="task-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Team Member Modal -->
+    <div class="modal-overlay" id="member-modal-overlay">
+        <div class="modal" id="member-modal">
+            <div class="modal-header">
+                <h2 id="member-modal-title">Add Team Member</h2>
+                <button class="modal-close" id="member-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="member-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="member-name">Full Name *</label>
+                        <input type="text" id="member-name" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="member-email">Email *</label>
+                        <div class="email-input-wrapper">
+                            <input type="text" id="member-email" required placeholder="john">
+                            <span class="email-domain">@aflog.in</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="member-password">Password *</label>
+                        <input type="password" id="member-password" required placeholder="Create password">
+                    </div>
+                    <div class="form-group">
+                        <label for="member-role-select">Role</label>
+                        <select id="member-role-select">
+                            <option value="Team Member">Team Member</option>
+                            <option value="Account Manager">Account Manager</option>
+                            <option value="Campaign Manager">Campaign Manager</option>
+                            <option value="Sales Lead">Sales Lead</option>
+                            <option value="Brand Strategist">Brand Strategist</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="member-active" checked>
+                            <span>Active Account</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="member-is-admin">
+                            <span>Admin Privileges</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="member-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Airtable Settings Modal -->
     <div class="modal-overlay" id="airtable-modal-overlay">
         <div class="modal" id="airtable-modal">
@@ -574,6 +852,25 @@
         </div>
     </div>
 
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" id="confirm-modal-overlay">
+        <div class="modal modal-small" id="confirm-modal">
+            <div class="modal-header">
+                <h2>Confirm Action</h2>
+                <button class="modal-close" id="confirm-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="confirm-content">
+                <p id="confirm-message">Are you sure you want to proceed?</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-yes">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
@@ -582,5 +879,4 @@
 
     <script src="js/app.js"></script>
 </body>
-
 </html>
