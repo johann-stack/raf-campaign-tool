@@ -1,5 +1,5 @@
 /* ========================================
-   RAF Campaign Management System
+   Aflog Campaign Management System
    Complete Stylesheet
    ======================================== */
 
@@ -70,7 +70,9 @@ body {
     background: var(--secondary);
 }
 
-/* Sidebar */
+/* ========================================
+   Sidebar
+   ======================================== */
 .sidebar {
     position: fixed;
     left: 0;
@@ -145,6 +147,10 @@ body {
     border-left: 3px solid var(--primary);
 }
 
+.nav-item.hidden {
+    display: none;
+}
+
 .nav-item i {
     width: 20px;
     text-align: center;
@@ -157,6 +163,11 @@ body {
     font-weight: 600;
     background: var(--bg-tertiary);
     border-radius: 10px;
+}
+
+.nav-item .badge.task-badge {
+    background: var(--primary);
+    color: white;
 }
 
 .nav-item .badge.hot { background: var(--hot); color: white; }
@@ -199,7 +210,9 @@ body {
     color: var(--text-muted);
 }
 
-/* Main Content */
+/* ========================================
+   Main Content
+   ======================================== */
 .main-content {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
@@ -252,7 +265,7 @@ body {
 .top-bar-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
 .user-profile img {
@@ -267,7 +280,9 @@ body {
     transform: scale(1.1);
 }
 
-/* Buttons */
+/* ========================================
+   Buttons
+   ======================================== */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -316,12 +331,27 @@ body {
     color: white;
 }
 
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: #16a34a;
+}
+
 .btn-sm {
     padding: 6px 12px;
     font-size: 0.8rem;
 }
 
-/* Views */
+/* ========================================
+   Views
+   ======================================== */
 .view {
     display: none;
     padding: 30px;
@@ -354,7 +384,15 @@ body {
     color: var(--text-secondary);
 }
 
-/* Stats Grid */
+.view-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* ========================================
+   Stats Grid
+   ======================================== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -410,7 +448,9 @@ body {
     color: var(--text-secondary);
 }
 
-/* Dashboard Charts */
+/* ========================================
+   Dashboard Charts
+   ======================================== */
 .dashboard-charts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -509,6 +549,7 @@ body {
 .activity-icon.add { background: rgba(34, 197, 94, 0.2); color: var(--success); }
 .activity-icon.update { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
 .activity-icon.status { background: rgba(249, 115, 22, 0.2); color: var(--hot); }
+.activity-icon.task { background: rgba(236, 72, 153, 0.2); color: var(--invoice); }
 
 .activity-content {
     flex: 1;
@@ -523,8 +564,230 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
+/* ========================================
+   Task Board
+   ======================================== */
+.tasks-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    min-height: 500px;
+}
 
-/* Tables */
+.task-column {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.task-column-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.task-column-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-column-header.pending h3 { color: var(--warning); }
+.task-column-header.in-progress h3 { color: var(--info); }
+.task-column-header.completed h3 { color: var(--success); }
+
+.task-count {
+    background: var(--bg-tertiary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.task-list {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: var(--primary);
+}
+
+.task-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.task-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    margin-right: 10px;
+}
+
+.task-priority {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.task-priority.low { background: rgba(100, 116, 139, 0.2); color: var(--secondary); }
+.task-priority.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.task-priority.high { background: rgba(249, 115, 22, 0.2); color: var(--hot); }
+.task-priority.urgent { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+.task-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.task-brand {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg-secondary);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.task-brand i {
+    color: var(--primary);
+}
+
+.task-due {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.task-due.overdue {
+    color: var(--danger);
+}
+
+.task-due.soon {
+    color: var(--warning);
+}
+
+.task-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.task-assignee {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-assignee img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.task-assignee span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.task-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.task-action-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    transition: var(--transition);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+.task-action-btn:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.task-status-select {
+    padding: 4px 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.empty-tasks {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-tasks i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.empty-tasks p {
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   Tables
+   ======================================== */
 .table-container {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -598,6 +861,9 @@ body {
 .status-badge.running { background: var(--running); color: white; }
 .status-badge.live { background: var(--live); color: white; }
 .status-badge.invoice { background: var(--invoice); color: white; }
+.status-badge.active { background: var(--success); color: white; }
+.status-badge.inactive { background: var(--secondary); color: white; }
+.status-badge.admin { background: var(--primary); color: white; }
 
 .budget-badge {
     display: inline-block;
@@ -658,7 +924,155 @@ body {
     transform: scale(1.1);
 }
 
-/* Campaigns Grid */
+/* ========================================
+   Team Grid & Cards
+   ======================================== */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.team-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.team-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    border: 3px solid var(--primary);
+}
+
+.team-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.team-role {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.team-email {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.team-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.team-stat {
+    text-align: center;
+}
+
+.team-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.team-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ========================================
+   Member Detail View
+   ======================================== */
+.member-detail-header {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.back-btn {
+    align-self: flex-start;
+}
+
+.member-info-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.member-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+}
+
+.member-stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.member-stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.member-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.member-stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+.member-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.detail-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-section h3 i {
+    color: var(--primary);
+}
+
+/* ========================================
+   Campaigns Grid
+   ======================================== */
 .campaigns-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -746,65 +1160,9 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
-
-/* Team Grid */
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.team-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
-
-.team-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 15px;
-    border: 3px solid var(--primary);
-}
-
-.team-name {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.team-role {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin-bottom: 15px;
-}
-
-.team-stats {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding-top: 15px;
-    border-top: 1px solid var(--border-color);
-}
-
-.team-stat {
-    text-align: center;
-}
-
-.team-stat-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.team-stat-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-/* Modals */
+/* ========================================
+   Modals
+   ======================================== */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -835,6 +1193,10 @@ body {
 
 .modal-large {
     max-width: 900px;
+}
+
+.modal-small {
+    max-width: 400px;
 }
 
 @keyframes modalSlide {
@@ -874,9 +1236,13 @@ body {
     color: white;
 }
 
-/* Forms */
+/* ========================================
+   Forms
+   ======================================== */
 #brand-form,
-#airtable-form {
+#airtable-form,
+#task-form,
+#member-form {
     padding: 20px;
 }
 
@@ -927,6 +1293,28 @@ body {
     color: var(--text-muted);
 }
 
+.email-input-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.email-input-wrapper input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    flex: 1;
+}
+
+.email-domain {
+    padding: 10px 14px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-left: none;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
 .checkbox-label {
     display: flex;
     align-items: center;
@@ -950,6 +1338,30 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
+/* ========================================
+   Confirm Modal
+   ======================================== */
+.confirm-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.confirm-content p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+}
+
+.confirm-content .form-actions {
+    justify-content: center;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+/* ========================================
+   Sync Status
+   ======================================== */
 .sync-status {
     margin: 0 20px 20px;
     padding: 12px;
@@ -972,7 +1384,9 @@ body {
     border: 1px solid var(--danger);
 }
 
-/* Campaign Details */
+/* ========================================
+   Campaign Details
+   ======================================== */
 .campaign-details {
     padding: 20px;
 }
@@ -1011,7 +1425,9 @@ body {
     color: var(--text-muted);
 }
 
-/* Toast */
+/* ========================================
+   Toast Notification
+   ======================================== */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -1038,7 +1454,17 @@ body {
     font-size: 1.25rem;
 }
 
-/* Empty State */
+.toast.error {
+    border-color: var(--danger);
+}
+
+.toast.error i {
+    color: var(--danger);
+}
+
+/* ========================================
+   Empty State
+   ======================================== */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -1057,7 +1483,23 @@ body {
     color: var(--text-secondary);
 }
 
-/* Responsive */
+/* ========================================
+   Responsive Design
+   ======================================== */
+@media (max-width: 1200px) {
+    .member-stats-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .tasks-board {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-column {
+        max-height: 400px;
+    }
+}
+
 @media (max-width: 1024px) {
     .form-grid {
         grid-template-columns: 1fr;
@@ -1074,22 +1516,97 @@ body {
     .campaign-overview {
         grid-template-columns: repeat(2, 1fr);
     }
+    
+    .member-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
     }
     
     .main-content {
         margin-left: 0;
     }
     
+    .top-bar {
+        padding: 0 15px;
+    }
+    
     .search-container {
-        width: 200px;
+        width: 150px;
+    }
+    
+    .search-container input {
+        padding: 10px 10px 10px 35px;
+        font-size: 0.8rem;
+    }
+    
+    .top-bar-actions {
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .btn span {
+        display: none;
     }
     
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .campaigns-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .view {
+        padding: 20px 15px;
+    }
+    
+    .view-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .member-info-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .member-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .member-stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal {
+        margin: 10px;
+        max-height: 95vh;
+    }
+    
+    .campaign-overview {
+        grid-template-columns: 1fr;
     }
 }
