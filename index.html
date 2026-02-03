@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAF CMS - Login</title>
+    <title>Aflog CMS - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -175,12 +175,6 @@
             font-size: 0.8rem;
         }
 
-        /* Loading state */
-        .login-btn.loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
         .spinner {
             width: 20px;
             height: 20px;
@@ -202,6 +196,12 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        .domain-hint {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -209,7 +209,7 @@
         <div class="login-header">
             <div class="login-logo">
                 <i class="fas fa-rocket"></i>
-                <span>RAF CMS</span>
+                <span>Aflog CMS</span>
             </div>
             <p class="login-subtitle">Campaign Management System</p>
         </div>
@@ -221,11 +221,12 @@
 
         <form id="login-form">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="email">Email</label>
                 <div class="input-wrapper">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="Enter your username" required>
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="yourname@aflog.in" required>
                 </div>
+                <p class="domain-hint">Use your @aflog.in email</p>
             </div>
 
             <div class="form-group">
@@ -250,21 +251,40 @@
         </form>
 
         <p class="footer-text">
-            <i class="fas fa-shield-alt"></i> Secure access for RAF team members only
+            <i class="fas fa-shield-alt"></i> Secure access for Aflog team members only
         </p>
     </div>
 
     <script>
         // =============================================
-        // 🔐 SET YOUR LOGIN CREDENTIALS HERE
+        // DEFAULT ADMIN ACCOUNT
+        // Team members are managed from Admin Dashboard
         // =============================================
-        const VALID_USERS = [
-            { username: 'admin', password: 'raf@2024' },
-            { username: 'rafteam', password: 'campaign123' },
-            // Add more users as needed:
-            // { username: 'john', password: 'john@123' },
-        ];
-        // =============================================
+        const DEFAULT_ADMIN = {
+            email: 'admin@aflog.in',
+            password: 'admin@2024',
+            name: 'Admin',
+            role: 'admin'
+        };
+
+        // Initialize team members in localStorage if not exists
+        function initializeUsers() {
+            let users = JSON.parse(localStorage.getItem('aflog_users'));
+            if (!users) {
+                users = [
+                    {
+                        id: 1,
+                        email: 'admin@aflog.in',
+                        password: 'admin@2024',
+                        name: 'Admin',
+                        role: 'admin',
+                        active: true
+                    }
+                ];
+                localStorage.setItem('aflog_users', JSON.stringify(users));
+            }
+            return users;
+        }
 
         const loginForm = document.getElementById('login-form');
         const loginBtn = document.getElementById('login-btn');
@@ -272,17 +292,27 @@
         const errorText = document.getElementById('error-text');
 
         // Check if already logged in
-        if (localStorage.getItem('raf_logged_in') === 'true' || 
-            sessionStorage.getItem('raf_logged_in') === 'true') {
+        if (localStorage.getItem('aflog_logged_in') === 'true' || 
+            sessionStorage.getItem('aflog_logged_in') === 'true') {
             window.location.href = 'dashboard.html';
         }
+
+        // Initialize users
+        initializeUsers();
 
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const remember = document.getElementById('remember').checked;
+
+            // Validate email domain
+            if (!email.endsWith('@aflog.in')) {
+                errorText.textContent = 'Please use your @aflog.in email';
+                errorMessage.classList.add('show');
+                return;
+            }
 
             // Show loading
             loginBtn.classList.add('loading');
@@ -290,25 +320,35 @@
 
             // Simulate brief delay for UX
             setTimeout(() => {
-                const validUser = VALID_USERS.find(
-                    user => user.username === username && user.password === password
+                const users = JSON.parse(localStorage.getItem('aflog_users')) || [];
+                
+                const validUser = users.find(
+                    user => user.email.toLowerCase() === email && 
+                           user.password === password &&
+                           user.active !== false
                 );
 
                 if (validUser) {
                     // Store login state
-                    if (remember) {
-                        localStorage.setItem('raf_logged_in', 'true');
-                        localStorage.setItem('raf_user', username);
-                    } else {
-                        sessionStorage.setItem('raf_logged_in', 'true');
-                        sessionStorage.setItem('raf_user', username);
-                    }
+                    const storage = remember ? localStorage : sessionStorage;
+                    storage.setItem('aflog_logged_in', 'true');
+                    storage.setItem('aflog_user_email', validUser.email);
+                    storage.setItem('aflog_user_name', validUser.name);
+                    storage.setItem('aflog_user_role', validUser.role);
+                    storage.setItem('aflog_user_id', validUser.id);
                     
                     // Redirect to dashboard
                     window.location.href = 'dashboard.html';
                 } else {
-                    // Show error
-                    errorText.textContent = 'Invalid username or password';
+                    // Check if user exists but wrong password
+                    const userExists = users.find(u => u.email.toLowerCase() === email);
+                    if (userExists && userExists.active === false) {
+                        errorText.textContent = 'Your account has been deactivated. Contact admin.';
+                    } else if (userExists) {
+                        errorText.textContent = 'Incorrect password';
+                    } else {
+                        errorText.textContent = 'Account not found. Contact admin for access.';
+                    }
                     errorMessage.classList.add('show');
                     loginBtn.classList.remove('loading');
                 }
