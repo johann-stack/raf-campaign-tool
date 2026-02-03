@@ -71,6 +71,11 @@
                     <span>Converted</span>
                     <span class="badge converted" id="badge-converted">0</span>
                 </a>
+                <a href="#" class="nav-item" data-view="campaigns">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>All Campaigns</span>
+                    <span class="badge running" id="badge-campaigns">0</span>
+                </a>
                 <a href="#" class="nav-item" data-view="running">
                     <i class="fas fa-play-circle"></i>
                     <span>Running</span>
@@ -85,6 +90,15 @@
                     <i class="fas fa-file-invoice-dollar"></i>
                     <span>Invoice Stage</span>
                     <span class="badge invoice" id="badge-invoice">0</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">Creators</span>
+                <a href="#" class="nav-item" data-view="creators">
+                    <i class="fas fa-user-star"></i>
+                    <span>Creator Database</span>
+                    <span class="badge" id="badge-creators">0</span>
                 </a>
             </div>
             
@@ -130,16 +144,16 @@
         <header class="top-bar">
             <div class="search-container">
                 <i class="fas fa-search"></i>
-                <input type="text" id="global-search" placeholder="Search brands, campaigns, tasks...">
+                <input type="text" id="global-search" placeholder="Search brands, campaigns, creators...">
             </div>
             <div class="top-bar-actions">
                 <button class="btn btn-secondary" id="add-task-btn">
                     <i class="fas fa-plus"></i>
-                    Add Task
+                    <span>Add Task</span>
                 </button>
                 <button class="btn btn-primary" id="add-brand-btn">
                     <i class="fas fa-plus"></i>
-                    Add Brand
+                    <span>Add Brand</span>
                 </button>
                 <div class="user-profile" id="header-profile">
                     <img src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="User">
@@ -175,7 +189,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon green">
-                        <i class="fas fa-play-circle"></i>
+                        <i class="fas fa-bullhorn"></i>
                     </div>
                     <div class="stat-info">
                         <span class="stat-value" id="stat-campaigns">0</span>
@@ -183,30 +197,30 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon red">
-                        <i class="fas fa-heart-crack"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-value" id="stat-lost">0</span>
-                        <span class="stat-label">Lost Brands</span>
-                    </div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-icon purple">
-                        <i class="fas fa-sync"></i>
+                        <i class="fas fa-users"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value" id="stat-retainer">0</span>
-                        <span class="stat-label">Retainers</span>
+                        <span class="stat-value" id="stat-creators">0</span>
+                        <span class="stat-label">Total Creators</span>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon teal">
-                        <i class="fas fa-check-circle"></i>
+                        <i class="fas fa-video"></i>
                     </div>
                     <div class="stat-info">
-                        <span class="stat-value" id="stat-conversion">0%</span>
-                        <span class="stat-label">Conversion Rate</span>
+                        <span class="stat-value" id="stat-content-live">0</span>
+                        <span class="stat-label">Content Live</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-revisions">0</span>
+                        <span class="stat-label">Pending Revisions</span>
                     </div>
                 </div>
             </div>
@@ -267,11 +281,10 @@
                         <tr>
                             <th>Brand Name</th>
                             <th>POC Name</th>
-                            <th>POC Number</th>
                             <th>POC Email</th>
-                            <th>Budget Status</th>
+                            <th>Budget</th>
                             <th>Status</th>
-                            <th>Brand Tool</th>
+                            <th>Campaigns</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -293,14 +306,10 @@
                             <th>Status</th>
                             <th>Brand Name</th>
                             <th>POC Name</th>
-                            <th>POC Number</th>
                             <th>POC Email</th>
                             <th>Budget</th>
                             <th>Pipeline Status</th>
                             <th>Aflog POC</th>
-                            <th>Month Added</th>
-                            <th>Task Assignee</th>
-                            <th>Brand Tool</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -322,13 +331,10 @@
                             <th>Status</th>
                             <th>Brand Name</th>
                             <th>POC Name</th>
-                            <th>POC Number</th>
                             <th>POC Email</th>
                             <th>Budget</th>
                             <th>Pipeline Status</th>
                             <th>Aflog POC</th>
-                            <th>Task Assignee</th>
-                            <th>Brand Tool</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -365,7 +371,7 @@
         <section id="view-converted" class="view">
             <div class="view-header">
                 <h1><i class="fas fa-exchange-alt"></i> Converted to Campaign</h1>
-                <p>Brands that have been converted</p>
+                <p>Brands ready for campaign creation</p>
             </div>
             <div class="table-container">
                 <table class="data-table" id="table-converted">
@@ -376,10 +382,7 @@
                             <th>POC Name</th>
                             <th>POC Email</th>
                             <th>Budget</th>
-                            <th>Campaign Name</th>
-                            <th>Pipeline Status</th>
-                            <th>Aflog POC</th>
-                            <th>Task Assignee</th>
+                            <th>Campaigns</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -388,39 +391,35 @@
             </div>
         </section>
 
+        <!-- All Campaigns View -->
+        <section id="view-campaigns" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div>
+                        <h1><i class="fas fa-bullhorn"></i> All Campaigns</h1>
+                        <p>View and manage all campaigns across brands</p>
+                    </div>
+                </div>
+            </div>
+            <div class="campaigns-list-container" id="all-campaigns-list"></div>
+        </section>
+
         <!-- Campaign Running View -->
         <section id="view-running" class="view">
             <div class="view-header">
-                <h1><i class="fas fa-play-circle"></i> Campaign Running</h1>
+                <h1><i class="fas fa-play-circle"></i> Campaigns Running</h1>
                 <p>Active campaigns currently in progress</p>
             </div>
-            <div class="table-container">
-                <table class="data-table" id="table-running">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Brand Name</th>
-                            <th>POC Name</th>
-                            <th>Campaign Name</th>
-                            <th>Current Status</th>
-                            <th>Retainer</th>
-                            <th>Aflog POC</th>
-                            <th>Task Assignee</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-running"></tbody>
-                </table>
-            </div>
+            <div class="campaigns-list-container" id="running-campaigns-list"></div>
         </section>
 
         <!-- Campaign Live View -->
         <section id="view-live" class="view">
             <div class="view-header">
-                <h1><i class="fas fa-broadcast-tower"></i> Campaign Live</h1>
-                <p>Campaigns currently live with metrics</p>
+                <h1><i class="fas fa-broadcast-tower"></i> Campaigns Live</h1>
+                <p>Campaigns with live content</p>
             </div>
-            <div class="campaigns-grid" id="campaigns-grid"></div>
+            <div class="campaigns-list-container" id="live-campaigns-list"></div>
         </section>
 
         <!-- Invoice Stage View -->
@@ -435,9 +434,9 @@
                         <tr>
                             <th>Status</th>
                             <th>Brand Name</th>
-                            <th>Campaign Name</th>
-                            <th>POC Email</th>
-                            <th>Campaign Closed At</th>
+                            <th>Campaign</th>
+                            <th>Creators</th>
+                            <th>Content Live</th>
                             <th>Invoiced</th>
                             <th>Invoice Status</th>
                             <th>Amount</th>
@@ -446,6 +445,178 @@
                     </thead>
                     <tbody id="tbody-invoice"></tbody>
                 </table>
+            </div>
+        </section>
+
+        <!-- Creator Database View -->
+        <section id="view-creators" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div>
+                        <h1><i class="fas fa-user-star"></i> Creator Database</h1>
+                        <p>All creators available for campaigns</p>
+                    </div>
+                    <button class="btn btn-primary" id="add-creator-db-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Add Creator
+                    </button>
+                </div>
+            </div>
+            <div class="creator-filters">
+                <select id="filter-platform" class="filter-select">
+                    <option value="">All Platforms</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="YouTube">YouTube</option>
+                </select>
+                <select id="filter-niche" class="filter-select">
+                    <option value="">All Niches</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Tech">Tech</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Food">Food</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Fitness">Fitness</option>
+                    <option value="Beauty">Beauty</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="Education">Education</option>
+                    <option value="Entertainment">Entertainment</option>
+                </select>
+                <input type="text" id="filter-search" class="filter-input" placeholder="Search creators...">
+            </div>
+            <div class="creators-grid" id="creators-grid"></div>
+        </section>
+
+        <!-- Brand Campaigns View (when clicking View Campaigns on a brand) -->
+        <section id="view-brand-campaigns" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div class="back-header">
+                        <button class="btn btn-secondary back-btn" id="back-to-brands">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <div>
+                            <h1 id="brand-campaigns-title">Brand Campaigns</h1>
+                            <p id="brand-campaigns-subtitle">Manage campaigns for this brand</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="add-campaign-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Campaign
+                    </button>
+                </div>
+            </div>
+            <div class="brand-campaigns-grid" id="brand-campaigns-grid"></div>
+        </section>
+
+        <!-- Campaign Detail View -->
+        <section id="view-campaign-detail" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div class="back-header">
+                        <button class="btn btn-secondary back-btn" id="back-to-brand-campaigns">
+                            <i class="fas fa-arrow-left"></i>
+                            Back
+                        </button>
+                        <div>
+                            <h1 id="campaign-detail-title">Campaign Name</h1>
+                            <p id="campaign-detail-subtitle">Brand Name</p>
+                        </div>
+                    </div>
+                    <div class="campaign-actions">
+                        <button class="btn btn-secondary" id="edit-campaign-btn">
+                            <i class="fas fa-edit"></i>
+                            Edit Campaign
+                        </button>
+                        <button class="btn btn-primary" id="add-creator-to-campaign-btn">
+                            <i class="fas fa-user-plus"></i>
+                            Add Creator
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Stats -->
+            <div class="campaign-stats-row" id="campaign-stats-row">
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-live">0</span>
+                        <span class="campaign-stat-label">Content Live</span>
+                    </div>
+                </div>
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon orange">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-pending">0</span>
+                        <span class="campaign-stat-label">Pending</span>
+                    </div>
+                </div>
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon blue">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-revision">0</span>
+                        <span class="campaign-stat-label">In Revision</span>
+                    </div>
+                </div>
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon purple">
+                        <i class="fas fa-thumbs-up"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-approved">0</span>
+                        <span class="campaign-stat-label">Good to Go</span>
+                    </div>
+                </div>
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon red">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-dropout">0</span>
+                        <span class="campaign-stat-label">Dropouts</span>
+                    </div>
+                </div>
+                <div class="campaign-stat-card">
+                    <div class="campaign-stat-icon teal">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="campaign-stat-info">
+                        <span class="campaign-stat-value" id="cstat-total">0</span>
+                        <span class="campaign-stat-label">Total Creators</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Info Bar -->
+            <div class="campaign-info-bar" id="campaign-info-bar">
+                <div class="info-item">
+                    <i class="fas fa-hashtag"></i>
+                    <span>Platform: </span>
+                    <strong id="cinfo-platform">Instagram</strong>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>Created: </span>
+                    <strong id="cinfo-created">-</strong>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-rupee-sign"></i>
+                    <span>Budget: </span>
+                    <strong id="cinfo-budget">-</strong>
+                </div>
+            </div>
+
+            <!-- Creators in Campaign -->
+            <div class="campaign-creators-section">
+                <h3><i class="fas fa-users"></i> Creators in this Campaign</h3>
+                <div class="campaign-creators-list" id="campaign-creators-list"></div>
             </div>
         </section>
 
@@ -569,7 +740,7 @@
             </div>
         </section>
     </main>
- <!-- Add Brand Modal -->
+      <!-- Add Brand Modal -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="brand-modal">
             <div class="modal-header">
@@ -611,9 +782,6 @@
                             <option value="Warm Brands">Warm Brands</option>
                             <option value="Lost Brands">Lost Brands</option>
                             <option value="Converted to Campaign">Converted to Campaign</option>
-                            <option value="Campaign Running">Campaign Running</option>
-                            <option value="Campaign Live">Campaign Live</option>
-                            <option value="Invoice Stage">Invoice Stage</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -633,28 +801,6 @@
                             <option value="">Select Team Member</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="campaign-name">Campaign Name</label>
-                        <input type="text" id="campaign-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="task-assignee">Task Assignee</label>
-                        <select id="task-assignee">
-                            <option value="">Select Team Member</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="invoice-amount">Invoice Amount (₹)</label>
-                        <input type="number" id="invoice-amount" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="invoice-status">Invoice Status</label>
-                        <select id="invoice-status">
-                            <option value="">N/A</option>
-                            <option value="Invoice Cleared">Invoice Cleared</option>
-                            <option value="Invoice Delayed">Invoice Delayed</option>
-                        </select>
-                    </div>
                     <div class="form-group full-width">
                         <label for="brief-comments">Brief/Comments</label>
                         <textarea id="brief-comments" rows="3"></textarea>
@@ -665,22 +811,355 @@
                             <span>Has Brand Tool</span>
                         </label>
                     </div>
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="retainer">
-                            <span>Retainer Client</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="invoiced">
-                            <span>Invoiced</span>
-                        </label>
-                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Brand</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Campaign Modal -->
+    <div class="modal-overlay" id="campaign-modal-overlay">
+        <div class="modal" id="campaign-modal">
+            <div class="modal-header">
+                <h2 id="campaign-modal-title">Add New Campaign</h2>
+                <button class="modal-close" id="campaign-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="campaign-form">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="campaign-name">Campaign Name *</label>
+                        <input type="text" id="campaign-name" required placeholder="e.g., Summer Collection 2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-platform">Platform *</label>
+                        <select id="campaign-platform" required>
+                            <option value="">Select Platform</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Instagram + YouTube">Instagram + YouTube</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-budget">Campaign Budget (₹)</label>
+                        <input type="number" id="campaign-budget" placeholder="500000">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-start-date">Start Date</label>
+                        <input type="date" id="campaign-start-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-end-date">End Date</label>
+                        <input type="date" id="campaign-end-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-status">Status</label>
+                        <select id="campaign-status">
+                            <option value="Planning">Planning</option>
+                            <option value="Running">Running</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Invoice Pending">Invoice Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="campaign-poc">Campaign POC</label>
+                        <select id="campaign-poc">
+                            <option value="">Select Team Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="campaign-notes">Notes</label>
+                        <textarea id="campaign-notes" rows="3" placeholder="Campaign details, objectives..."></textarea>
+                    </div>
+                </div>
+                <input type="hidden" id="campaign-brand-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="campaign-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Creator to Database Modal -->
+    <div class="modal-overlay" id="creator-db-modal-overlay">
+        <div class="modal modal-large" id="creator-db-modal">
+            <div class="modal-header">
+                <h2 id="creator-db-modal-title">Add Creator to Database</h2>
+                <button class="modal-close" id="creator-db-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="creator-db-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="creator-name">Creator Name *</label>
+                        <input type="text" id="creator-name" required placeholder="Full name or page name">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-platform">Primary Platform *</label>
+                        <select id="creator-platform" required>
+                            <option value="">Select Platform</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="YouTube">YouTube</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-handle">Handle / Username *</label>
+                        <input type="text" id="creator-handle" required placeholder="@username">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-profile-link">Profile Link *</label>
+                        <input type="url" id="creator-profile-link" required placeholder="https://instagram.com/username">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-followers">Followers / Subscribers *</label>
+                        <input type="text" id="creator-followers" required placeholder="e.g., 500K or 2M">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-niche">Niche *</label>
+                        <select id="creator-niche" required>
+                            <option value="">Select Niche</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Tech">Tech</option>
+                            <option value="Lifestyle">Lifestyle</option>
+                            <option value="Food">Food</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Fitness">Fitness</option>
+                            <option value="Beauty">Beauty</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="Education">Education</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Automotive">Automotive</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Parenting">Parenting</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-contact">Contact Number</label>
+                        <input type="tel" id="creator-contact" placeholder="+91 98765 43210">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-email">Email</label>
+                        <input type="email" id="creator-email" placeholder="creator@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-avg-views">Avg. Views / Reach</label>
+                        <input type="text" id="creator-avg-views" placeholder="e.g., 50K">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-engagement">Engagement Rate</label>
+                        <input type="text" id="creator-engagement" placeholder="e.g., 5.2%">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-commercial">Commercial (₹)</label>
+                        <input type="text" id="creator-commercial" placeholder="e.g., 50000 or 50K-1L">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator-location">Location</label>
+                        <input type="text" id="creator-location" placeholder="City, Country">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="creator-notes">Notes</label>
+                        <textarea id="creator-notes" rows="2" placeholder="Any additional notes..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="creator-db-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Creator</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Creator to Campaign Modal -->
+    <div class="modal-overlay" id="creator-campaign-modal-overlay">
+        <div class="modal modal-large" id="creator-campaign-modal">
+            <div class="modal-header">
+                <h2 id="creator-campaign-modal-title">Add Creator to Campaign</h2>
+                <button class="modal-close" id="creator-campaign-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="creator-campaign-form">
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Creator Selection</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cc-select-creator">Select from Database</label>
+                            <select id="cc-select-creator">
+                                <option value="">-- Choose Existing Creator --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <span class="or-divider">OR add new details below</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-info-circle"></i> Creator Details</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cc-creator-name">Creator Name *</label>
+                            <input type="text" id="cc-creator-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-handle">Handle *</label>
+                            <input type="text" id="cc-creator-handle" required placeholder="@username">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-profile">Profile Link *</label>
+                            <input type="url" id="cc-creator-profile" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-followers">Followers</label>
+                            <input type="text" id="cc-creator-followers" placeholder="e.g., 500K">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-niche">Niche</label>
+                            <input type="text" id="cc-creator-niche">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-contact">Contact</label>
+                            <input type="tel" id="cc-creator-contact">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-email">Email</label>
+                            <input type="email" id="cc-creator-email">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-creator-commercial">Commercial (₹)</label>
+                            <input type="text" id="cc-creator-commercial">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-tasks"></i> Deliverables</h3>
+                    <div class="deliverables-container" id="deliverables-container">
+                        <!-- Instagram Deliverables -->
+                        <div class="deliverables-group instagram-deliverables">
+                            <h4><i class="fab fa-instagram"></i> Instagram</h4>
+                            <div class="deliverables-checkboxes">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Collab Reel">
+                                    <span>Collab Reel</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Non-Collab Reel">
+                                    <span>Non-Collab Reel</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Collab Reel + Story">
+                                    <span>Collab Reel + Story</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Story">
+                                    <span>Story</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Store Visit Reel">
+                                    <span>Store Visit Reel</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Static Post">
+                                    <span>Static Post</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="Carousel Post">
+                                    <span>Carousel Post</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- YouTube Deliverables -->
+                        <div class="deliverables-group youtube-deliverables">
+                            <h4><i class="fab fa-youtube"></i> YouTube</h4>
+                            <div class="deliverables-checkboxes">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="YT Shorts">
+                                    <span>YT Shorts</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="YT Dedicated Video">
+                                    <span>YT Dedicated Video</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="YT Integrated Video">
+                                    <span>YT Integrated Video</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="deliverable" value="YT Community Post">
+                                    <span>YT Community Post</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-cog"></i> Status</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cc-content-status">Content Status</label>
+                            <select id="cc-content-status">
+                                <option value="Pending">Pending (Not Received)</option>
+                                <option value="Received">Received</option>
+                                <option value="Revision">Revision Required</option>
+                                <option value="Good to Go">Good to Go</option>
+                                <option value="Live">Live</option>
+                                <option value="Dropout">Dropout</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-revision-count">Revision Count</label>
+                            <input type="number" id="cc-revision-count" value="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-drive-link">Content Drive Link</label>
+                            <input type="url" id="cc-drive-link" placeholder="Google Drive / Dropbox link">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-live-link">Live Post Link</label>
+                            <input type="url" id="cc-live-link" placeholder="Instagram/YouTube post link">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-chart-bar"></i> Metrics (Update when live)</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="cc-views">Views</label>
+                            <input type="number" id="cc-views" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-likes">Likes</label>
+                            <input type="number" id="cc-likes" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-comments">Comments</label>
+                            <input type="number" id="cc-comments" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="cc-shares">Shares / Saves</label>
+                            <input type="number" id="cc-shares" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="cc-campaign-id">
+                <input type="hidden" id="cc-creator-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="creator-campaign-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Creator</button>
                 </div>
             </form>
         </div>
@@ -839,16 +1318,18 @@
         </div>
     </div>
 
-    <!-- Campaign Details Modal -->
-    <div class="modal-overlay" id="campaign-modal-overlay">
-        <div class="modal modal-large" id="campaign-modal">
+    <!-- View Creator Content Modal -->
+    <div class="modal-overlay" id="view-content-modal-overlay">
+        <div class="modal modal-large" id="view-content-modal">
             <div class="modal-header">
-                <h2 id="campaign-modal-title">Campaign Details</h2>
-                <button class="modal-close" id="campaign-modal-close">
+                <h2 id="view-content-title">Creator Content</h2>
+                <button class="modal-close" id="view-content-modal-close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="campaign-details" id="campaign-details"></div>
+            <div class="content-view-container" id="content-view-container">
+                <!-- Content details will be rendered here -->
+            </div>
         </div>
     </div>
 
@@ -870,8 +1351,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Toast Notification -->
+       <!-- Toast Notification -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
         <span id="toast-message">Action completed successfully</span>
