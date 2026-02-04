@@ -16,6 +16,8 @@ let appData = {
     invoices: [],
     creators: [],
     bookmarkedCreators: [],
+    tasks: [],
+    activities: [],
     accessControl: {}
 };
 
@@ -100,6 +102,8 @@ function checkAdminAccess() {
 function checkCreatorDbAccess() {
     const overlay = document.getElementById('creatorRestrictedOverlay');
     
+    if (!overlay) return;
+    
     if (currentUser.role === 'admin') {
         overlay.style.display = 'none';
         return;
@@ -146,6 +150,8 @@ async function loadAppData() {
                 invoices: data.record.invoices || [],
                 creators: data.record.creators || [],
                 bookmarkedCreators: data.record.bookmarkedCreators || [],
+                tasks: data.record.tasks || [],
+                activities: data.record.activities || [],
                 accessControl: data.record.accessControl || {}
             };
         }
@@ -193,6 +199,26 @@ async function saveAppData() {
         localStorage.setItem('rafAppData', JSON.stringify(appData));
         
         return false;
+    }
+}
+
+// ===== Add Activity Log =====
+function addActivity(type, message, icon) {
+    const activity = {
+        id: generateId(),
+        type: type,
+        message: message,
+        icon: icon || 'brand',
+        user: currentUser.name || currentUser.email,
+        userId: currentUser.id,
+        timestamp: new Date().toISOString()
+    };
+    
+    appData.activities.unshift(activity);
+    
+    // Keep only last 50 activities
+    if (appData.activities.length > 50) {
+        appData.activities = appData.activities.slice(0, 50);
     }
 }
 
@@ -250,6 +276,8 @@ function navigateTo(sectionId) {
 function updatePageTitle(sectionId) {
     const titles = {
         'dashboard': { title: 'Dashboard', subtitle: 'Welcome back! Here\'s your campaign overview.' },
+        'my-tasks': { title: 'My Tasks', subtitle: 'Manage your tasks and stay organized.' },
+        'team-members': { title: 'Team Members', subtitle: 'View all team members and their tasks.' },
         'brands': { title: 'Brands', subtitle: 'Manage all your brand contacts.' },
         'hot-brands': { title: 'Hot Brands', subtitle: 'Brands with high conversion potential.' },
         'warm-brands': { title: 'Warm Brands', subtitle: 'Brands showing moderate interest.' },
@@ -279,12 +307,15 @@ function logout() {
 // ===== Global Search =====
 function handleGlobalSearch(e) {
     const searchTerm = e.target.value.toLowerCase();
-    // Implement global search across all data
     console.log('Searching for:', searchTerm);
 }
 // ===== Refresh All Data =====
 function refreshAllData() {
     updateDashboardStats();
+    updateConversionRate();
+    refreshDashboardTasks();
+    refreshRecentActivity();
+    refreshRecentBrands();
     refreshBrandsTable();
     refreshHotBrandsTable();
     refreshWarmBrandsTable();
@@ -295,15 +326,28 @@ function refreshAllData() {
     refreshInvoiceTable();
     refreshAllCampaignsTable();
     refreshCreatorDatabase();
+    refreshAllTasksList();
+    refreshTeamMembers();
     refreshUserManagement();
     refreshAccessControl();
     populateDropdowns();
+    updateTaskBadge();
 }
 
 function refreshSectionData(sectionId) {
     switch(sectionId) {
         case 'dashboard':
             updateDashboardStats();
+            updateConversionRate();
+            refreshDashboardTasks();
+            refreshRecentActivity();
+            refreshRecentBrands();
+            break;
+        case 'my-tasks':
+            refreshAllTasksList();
+            break;
+        case 'team-members':
+            refreshTeamMembers();
             break;
         case 'brands':
             refreshBrandsTable();
@@ -319,6 +363,7 @@ function refreshSectionData(sectionId) {
             break;
         case 'converted-campaigns':
             refreshConvertedCampaignsTable();
+            populateCampaignDropdowns();
             break;
         case 'running-campaigns':
             refreshRunningCampaignsTable();
@@ -353,72 +398,415 @@ function updateDashboardStats() {
     document.getElementById('activeCampaigns').textContent = 
         appData.runningCampaigns.length + appData.liveCampaigns.length;
     document.getElementById('hotLeads').textContent = appData.hotBrands.length;
-    document.getElementById('lostBrands').textContent = appData.lostBrands.length;
+    document.getElementById('lostBrandsCount').textContent = appData.lostBrands.length;
     document.getElementById('totalCreators').textContent = appData.creators.length;
-    
-    // Count retainer brands
-    const retainerCount = appData.runningCampaigns.filter(c => c.isRetainer).length;
-    document.getElementById('retainerBrands').textContent = retainerCount;
     
     // Update badge counts
     document.getElementById('hotBrandsCount').textContent = appData.hotBrands.length;
     document.getElementById('warmBrandsCount').textContent = appData.warmBrands.length;
-    
-    // Update recent activity
-    updateRecentActivity();
 }
 
-function updateRecentActivity() {
-    const tbody = document.getElementById('recentActivityTable');
+// ===== Conversion Rate =====
+function updateConversionRate() {
+    const totalBrands = appData.brands.length;
+    const convertedCount = appData.convertedCampaigns.length + 
+                          appData.runningCampaigns.length + 
+                          appData.liveCampaigns.length;
     
-    // Combine all activities with timestamps
-    let activities = [];
+    let conversionRate = 0;
+    if (totalBrands > 0) {
+        conversionRate = Math.round((convertedCount / totalBrands) * 100);
+    }
     
-    appData.brands.forEach(brand => {
-        activities.push({
-            brand: brand.brandName,
-            status: brand.status,
-            campaign: '-',
-            date: brand.createdAt || new Date().toISOString()
-        });
+    document.getElementById('conversionRate').textContent = conversionRate + '%';
+}
+
+// ===== Update Task Badge =====
+function updateTaskBadge() {
+    const myTasks = appData.tasks.filter(task => 
+        task.assignTo === currentUser.name || 
+        task.assignTo === currentUser.email ||
+        task.userId === currentUser.id
+    );
+    
+    const pendingTasks = myTasks.filter(task => !task.completed);
+    document.getElementById('myTasksCount').textContent = pendingTasks.length;
+}
+
+// ===== Dashboard Tasks Preview =====
+function refreshDashboardTasks() {
+    const container = document.getElementById('dashboardTasksList');
+    
+    // Get tasks assigned to current user
+    const myTasks = appData.tasks.filter(task => 
+        task.assignTo === currentUser.name || 
+        task.assignTo === currentUser.email ||
+        task.userId === currentUser.id
+    );
+    
+    // Get only pending tasks, sorted by due date
+    const pendingTasks = myTasks
+        .filter(task => !task.completed)
+        .sort((a, b) => {
+            if (!a.dueDate) return 1;
+            if (!b.dueDate) return -1;
+            return new Date(a.dueDate) - new Date(b.dueDate);
+        })
+        .slice(0, 5); // Show only first 5
+    
+    if (pendingTasks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: 40px;">
+                <i class="fas fa-clipboard-check"></i>
+                <h3>No pending tasks</h3>
+                <p>You're all caught up!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = pendingTasks.map(task => `
+        <div class="task-item">
+            <div class="task-checkbox ${task.completed ? 'completed' : ''}" onclick="toggleTaskComplete('${task.id}')"></div>
+            <div class="task-content ${task.completed ? 'completed' : ''}">
+                <h4>${task.title}</h4>
+                <p>${task.linkedBrand ? `<i class="fas fa-building"></i> ${task.linkedBrand}` : ''}
+                   ${task.linkedCampaign ? `<i class="fas fa-rocket"></i> ${task.linkedCampaign}` : ''}</p>
+            </div>
+            <div class="task-meta">
+                ${task.dueDate ? `<span class="task-due ${isOverdue(task.dueDate) ? 'overdue' : ''}">
+                    <i class="fas fa-calendar"></i> ${formatDate(task.dueDate)}
+                </span>` : ''}
+                <div class="task-priority ${task.priority}"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== All Tasks List =====
+function refreshAllTasksList() {
+    const container = document.getElementById('allTasksList');
+    const filterStatus = document.getElementById('taskFilterStatus')?.value || 'all';
+    
+    // Get tasks assigned to current user
+    let myTasks = appData.tasks.filter(task => 
+        task.assignTo === currentUser.name || 
+        task.assignTo === currentUser.email ||
+        task.userId === currentUser.id
+    );
+    
+    // Apply filter
+    if (filterStatus === 'pending') {
+        myTasks = myTasks.filter(task => !task.completed);
+    } else if (filterStatus === 'completed') {
+        myTasks = myTasks.filter(task => task.completed);
+    }
+    
+    // Sort by due date
+    myTasks.sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed ? 1 : -1;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
     });
     
-    appData.convertedCampaigns.forEach(campaign => {
-        activities.push({
-            brand: campaign.brandName,
-            status: 'Converted',
-            campaign: campaign.campaignName,
-            date: campaign.createdAt || new Date().toISOString()
-        });
-    });
+    if (myTasks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-clipboard-check"></i>
+                <h3>No tasks found</h3>
+                <p>${filterStatus === 'all' ? 'Create your first task to get started' : 'No ' + filterStatus + ' tasks'}</p>
+            </div>
+        `;
+        return;
+    }
     
-    // Sort by date (newest first)
-    activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+    container.innerHTML = myTasks.map(task => `
+        <div class="task-item">
+            <div class="task-checkbox ${task.completed ? 'completed' : ''}" onclick="toggleTaskComplete('${task.id}')"></div>
+            <div class="task-content ${task.completed ? 'completed' : ''}">
+                <h4>${task.title}</h4>
+                <p>
+                    ${task.linkedBrand ? `<i class="fas fa-building"></i> ${task.linkedBrand}` : ''}
+                    ${task.linkedCampaign ? `<i class="fas fa-rocket"></i> ${task.linkedCampaign}` : ''}
+                    ${task.description ? `<br><small>${task.description}</small>` : ''}
+                </p>
+            </div>
+            <div class="task-meta">
+                ${task.dueDate ? `<span class="task-due ${isOverdue(task.dueDate) && !task.completed ? 'overdue' : ''}">
+                    <i class="fas fa-calendar"></i> ${formatDate(task.dueDate)}
+                </span>` : ''}
+                <div class="task-priority ${task.priority}"></div>
+            </div>
+            <div class="task-actions">
+                <button class="btn btn-sm btn-danger" onclick="deleteTask('${task.id}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterTasks() {
+    refreshAllTasksList();
+}
+
+function isOverdue(dueDate) {
+    if (!dueDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    return due < today;
+}
+
+// ===== Toggle Task Complete =====
+async function toggleTaskComplete(taskId) {
+    const taskIndex = appData.tasks.findIndex(t => t.id === taskId);
     
-    // Take only last 5
-    activities = activities.slice(0, 5);
+    if (taskIndex > -1) {
+        appData.tasks[taskIndex].completed = !appData.tasks[taskIndex].completed;
+        appData.tasks[taskIndex].completedAt = appData.tasks[taskIndex].completed ? new Date().toISOString() : null;
+        
+        const status = appData.tasks[taskIndex].completed ? 'completed' : 'reopened';
+        addActivity('task', `<strong>${currentUser.name}</strong> ${status} task: "${appData.tasks[taskIndex].title}"`, 'task');
+        
+        await saveAppData();
+        refreshDashboardTasks();
+        refreshAllTasksList();
+        updateTaskBadge();
+        
+        showToast(`Task ${status}`, 'success');
+    }
+}
+
+// ===== Delete Task =====
+async function deleteTask(taskId) {
+    if (!confirm('Are you sure you want to delete this task?')) return;
     
-    if (activities.length === 0) {
+    const taskIndex = appData.tasks.findIndex(t => t.id === taskId);
+    
+    if (taskIndex > -1) {
+        const task = appData.tasks[taskIndex];
+        appData.tasks.splice(taskIndex, 1);
+        
+        addActivity('task', `<strong>${currentUser.name}</strong> deleted task: "${task.title}"`, 'task');
+        
+        await saveAppData();
+        refreshDashboardTasks();
+        refreshAllTasksList();
+        updateTaskBadge();
+        
+        showToast('Task deleted', 'success');
+    }
+}
+
+// ===== Save Task =====
+async function saveTask() {
+    const form = document.getElementById('addTaskForm');
+    const formData = new FormData(form);
+    
+    const task = {
+        id: generateId(),
+        title: formData.get('taskTitle'),
+        linkedBrand: formData.get('linkedBrand'),
+        linkedCampaign: formData.get('linkedCampaign'),
+        priority: formData.get('priority'),
+        dueDate: formData.get('dueDate'),
+        assignTo: formData.get('assignTo'),
+        description: formData.get('description'),
+        completed: false,
+        createdBy: currentUser.name || currentUser.email,
+        userId: currentUser.id,
+        createdAt: new Date().toISOString()
+    };
+    
+    appData.tasks.push(task);
+    
+    addActivity('task', `<strong>${currentUser.name}</strong> created task: "${task.title}" assigned to <strong>${task.assignTo}</strong>`, 'task');
+    
+    await saveAppData();
+    refreshAllData();
+    
+    form.reset();
+    closeModal('addTaskModal');
+    
+    showToast('Task created successfully', 'success');
+}
+
+// ===== Recent Activity =====
+function refreshRecentActivity() {
+    const container = document.getElementById('recentActivityList');
+    
+    if (!appData.activities || appData.activities.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: 20px;">
+                <p style="color: var(--text-muted);">No recent activity</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show last 10 activities
+    const recentActivities = appData.activities.slice(0, 10);
+    
+    container.innerHTML = recentActivities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon ${activity.icon || 'brand'}">
+                <i class="fas fa-${getActivityIcon(activity.icon)}"></i>
+            </div>
+            <div class="activity-content">
+                <p>${activity.message}</p>
+                <span>${formatTimeAgo(activity.timestamp)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function getActivityIcon(type) {
+    const icons = {
+        'brand': 'building',
+        'status': 'exchange-alt',
+        'task': 'clipboard-check',
+        'campaign': 'rocket',
+        'creator': 'user-circle',
+        'user': 'user-plus'
+    };
+    return icons[type] || 'circle';
+}
+
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diff = Math.floor((now - time) / 1000);
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + ' days ago';
+    
+    return formatDate(timestamp);
+}
+
+// ===== Recent Brands Table =====
+function refreshRecentBrands() {
+    const tbody = document.getElementById('recentBrandsTable');
+    
+    if (appData.brands.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="empty-state">
-                    <p>No recent activity</p>
+                <td colspan="5" class="empty-state">
+                    <p>No brands added yet</p>
                 </td>
             </tr>
         `;
         return;
     }
     
-    tbody.innerHTML = activities.map(activity => `
+    // Get last 5 brands
+    const recentBrands = [...appData.brands]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+    
+    tbody.innerHTML = recentBrands.map(brand => `
         <tr>
-            <td>${activity.brand}</td>
-            <td><span class="status-badge ${getStatusClass(activity.status)}">${activity.status}</span></td>
-            <td>${activity.campaign}</td>
-            <td>${formatDate(activity.date)}</td>
+            <td><strong>${brand.brandName}</strong></td>
+            <td><span class="status-badge ${getStatusClass(brand.status)}">${brand.status}</span></td>
+            <td>${brand.pocName}</td>
+            <td><span class="status-badge ${getBudgetClass(brand.budgetStatus)}">${brand.budgetStatus}</span></td>
+            <td>${formatDate(brand.createdAt)}</td>
         </tr>
     `).join('');
 }
 
+// ===== Team Members =====
+function refreshTeamMembers() {
+    const container = document.getElementById('teamMembersGrid');
+    
+    if (appData.users.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>No team members yet</h3>
+                <p>Add team members from User Management</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = appData.users.map(user => {
+        // Count tasks for this user
+        const userTasks = appData.tasks.filter(task => 
+            task.assignTo === user.name || 
+            task.assignTo === user.email ||
+            task.userId === user.id
+        );
+        
+        const pendingTasks = userTasks.filter(t => !t.completed).length;
+        const completedTasks = userTasks.filter(t => t.completed).length;
+        
+        return `
+            <div class="team-card" onclick="viewMemberTasks('${user.id}', '${user.name}')">
+                <div class="team-card-avatar">${user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
+                <h4>${user.name}</h4>
+                <p>${user.email}</p>
+                <span class="role-badge ${user.role}">${user.role === 'admin' ? 'Admin' : 'User'}</span>
+                <div class="team-card-stats">
+                    <div class="team-card-stat">
+                        <h5>${pendingTasks}</h5>
+                        <p>Pending</p>
+                    </div>
+                    <div class="team-card-stat">
+                        <h5>${completedTasks}</h5>
+                        <p>Completed</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ===== View Member Tasks =====
+function viewMemberTasks(userId, userName) {
+    document.getElementById('memberNameTitle').textContent = userName;
+    
+    const container = document.getElementById('memberTasksList');
+    
+    const userTasks = appData.tasks.filter(task => 
+        task.userId === userId ||
+        task.assignTo === userName
+    );
+    
+    if (userTasks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-clipboard-check"></i>
+                <h3>No tasks assigned</h3>
+                <p>${userName} has no tasks</p>
+            </div>
+        `;
+    } else {
+        container.innerHTML = userTasks.map(task => `
+            <div class="task-item">
+                <div class="task-checkbox ${task.completed ? 'completed' : ''}"></div>
+                <div class="task-content ${task.completed ? 'completed' : ''}">
+                    <h4>${task.title}</h4>
+                    <p>
+                        ${task.linkedBrand ? `<i class="fas fa-building"></i> ${task.linkedBrand}` : ''}
+                        ${task.linkedCampaign ? `<i class="fas fa-rocket"></i> ${task.linkedCampaign}` : ''}
+                    </p>
+                </div>
+                <div class="task-meta">
+                    ${task.dueDate ? `<span class="task-due ${isOverdue(task.dueDate) && !task.completed ? 'overdue' : ''}">
+                        <i class="fas fa-calendar"></i> ${formatDate(task.dueDate)}
+                    </span>` : ''}
+                    <div class="task-priority ${task.priority}"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    openModal('viewMemberTasksModal');
+}
 // ===== Brands Table =====
 function refreshBrandsTable() {
     const tbody = document.getElementById('brandsTableBody');
@@ -472,6 +860,8 @@ async function updateBrandStatus(index, newStatus) {
     
     // Add to new status table
     addToStatusTable(brand, newStatus);
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> changed <strong>${brand.brandName}</strong> status from ${oldStatus} to ${newStatus}`, 'status');
     
     await saveAppData();
     refreshAllData();
@@ -591,13 +981,13 @@ function refreshHotBrandsTable() {
             <td>${brand.hasBrandTool ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
             <td>${brand.taskAssignee || '-'}</td>
             <td>
-                <button class="btn btn-sm btn-success" onclick="convertToWarm(${index})">
+                <button class="btn btn-sm btn-success" onclick="convertToWarm(${index})" title="Move to Warm">
                     <i class="fas fa-temperature-half"></i>
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="convertToCampaign(${index}, 'hot')">
+                <button class="btn btn-sm btn-primary" onclick="convertToCampaign(${index}, 'hot')" title="Convert to Campaign">
                     <i class="fas fa-rocket"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="markAsLost(${index}, 'hot')">
+                <button class="btn btn-sm btn-danger" onclick="markAsLost(${index}, 'hot')" title="Mark as Lost">
                     <i class="fas fa-heart-crack"></i>
                 </button>
             </td>
@@ -607,6 +997,9 @@ function refreshHotBrandsTable() {
 
 async function updateHotBrandPipeline(index, newStatus) {
     appData.hotBrands[index].pipelineStatus = newStatus;
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> updated <strong>${appData.hotBrands[index].brandName}</strong> pipeline to ${newStatus}`, 'status');
+    
     await saveAppData();
     showToast('Pipeline status updated', 'success');
 }
@@ -625,6 +1018,8 @@ async function convertToWarm(index) {
     if (mainBrand) {
         mainBrand.status = 'Warm Brands';
     }
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> moved <strong>${brand.brandName}</strong> to Warm Brands`, 'status');
     
     await saveAppData();
     refreshAllData();
@@ -676,6 +1071,8 @@ async function convertToCampaign(index, source) {
         mainBrand.campaignName = campaignName;
     }
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> converted <strong>${brand.brandName}</strong> to campaign: <strong>${campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -715,6 +1112,8 @@ async function markAsLost(index, source) {
     if (mainBrand) {
         mainBrand.status = 'Lost Brands';
     }
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> marked <strong>${brand.brandName}</strong> as Lost`, 'status');
     
     await saveAppData();
     refreshAllData();
@@ -757,13 +1156,13 @@ function refreshWarmBrandsTable() {
             <td>${brand.hasBrandTool ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
             <td>${brand.taskAssignee || '-'}</td>
             <td>
-                <button class="btn btn-sm btn-warning" onclick="convertToHot(${index})">
+                <button class="btn btn-sm btn-warning" onclick="convertToHot(${index})" title="Move to Hot">
                     <i class="fas fa-fire"></i>
                 </button>
-                <button class="btn btn-sm btn-primary" onclick="convertToCampaign(${index}, 'warm')">
+                <button class="btn btn-sm btn-primary" onclick="convertToCampaign(${index}, 'warm')" title="Convert to Campaign">
                     <i class="fas fa-rocket"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="markAsLost(${index}, 'warm')">
+                <button class="btn btn-sm btn-danger" onclick="markAsLost(${index}, 'warm')" title="Mark as Lost">
                     <i class="fas fa-heart-crack"></i>
                 </button>
             </td>
@@ -773,6 +1172,9 @@ function refreshWarmBrandsTable() {
 
 async function updateWarmBrandPipeline(index, newStatus) {
     appData.warmBrands[index].pipelineStatus = newStatus;
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> updated <strong>${appData.warmBrands[index].brandName}</strong> pipeline to ${newStatus}`, 'status');
+    
     await saveAppData();
     showToast('Pipeline status updated', 'success');
 }
@@ -791,6 +1193,8 @@ async function convertToHot(index) {
     if (mainBrand) {
         mainBrand.status = 'Hot Brands';
     }
+    
+    addActivity('status', `<strong>${currentUser.name}</strong> moved <strong>${brand.brandName}</strong> to Hot Brands`, 'status');
     
     await saveAppData();
     refreshAllData();
@@ -821,10 +1225,10 @@ function refreshLostBrandsTable() {
             <td>${brand.lostReason || '-'}</td>
             <td>${formatDate(brand.lostDate)}</td>
             <td>
-                <button class="btn btn-sm btn-success" onclick="reviveBrand(${index})">
-                    <i class="fas fa-redo"></i> Revive
+                <button class="btn btn-sm btn-success" onclick="reviveBrand(${index})" title="Revive Brand">
+                    <i class="fas fa-redo"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteLostBrand(${index})">
+                <button class="btn btn-sm btn-danger" onclick="deleteLostBrand(${index})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -860,6 +1264,8 @@ async function reviveBrand(index) {
         mainBrand.status = 'Warm Brands';
     }
     
+    addActivity('status', `<strong>${currentUser.name}</strong> revived <strong>${brand.brandName}</strong> to Warm Brands`, 'status');
+    
     await saveAppData();
     refreshAllData();
     
@@ -870,6 +1276,8 @@ async function deleteLostBrand(index) {
     if (confirm('Are you sure you want to permanently delete this brand?')) {
         const brand = appData.lostBrands[index];
         appData.lostBrands.splice(index, 1);
+        
+        addActivity('brand', `<strong>${currentUser.name}</strong> deleted <strong>${brand.brandName}</strong>`, 'brand');
         
         await saveAppData();
         refreshAllData();
@@ -909,13 +1317,13 @@ function refreshConvertedCampaignsTable() {
                 <span class="status-badge info">${campaign.creators ? campaign.creators.length : 0} creators</span>
             </td>
             <td>
-                <button class="btn btn-sm btn-success" onclick="moveToRunning(${index})">
+                <button class="btn btn-sm btn-success" onclick="moveToRunning(${index})" title="Move to Running">
                     <i class="fas fa-play"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary" onclick="viewCampaignCreators(${index})">
+                <button class="btn btn-sm btn-secondary" onclick="viewCampaignCreators(${index})" title="View Creators">
                     <i class="fas fa-users"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteConvertedCampaign(${index})">
+                <button class="btn btn-sm btn-danger" onclick="deleteConvertedCampaign(${index})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -925,6 +1333,9 @@ function refreshConvertedCampaignsTable() {
 
 async function updateConvertedPipeline(index, newStatus) {
     appData.convertedCampaigns[index].pipelineStatus = newStatus;
+    
+    addActivity('campaign', `<strong>${currentUser.name}</strong> updated <strong>${appData.convertedCampaigns[index].campaignName}</strong> pipeline to ${newStatus}`, 'campaign');
+    
     await saveAppData();
     showToast('Pipeline status updated', 'success');
 }
@@ -951,6 +1362,8 @@ async function moveToRunning(index) {
     // Remove from converted
     appData.convertedCampaigns.splice(index, 1);
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> moved <strong>${campaign.campaignName}</strong> to Running Campaigns`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -966,7 +1379,7 @@ function viewCampaignCreators(index) {
         return;
     }
     
-    let creatorList = creators.map(c => `- ${c.name} (@${c.username})`).join('\n');
+    let creatorList = creators.map(c => `• ${c.name} (@${c.username})`).join('\n');
     alert(`Creators in ${campaign.campaignName}:\n\n${creatorList}`);
 }
 
@@ -974,6 +1387,8 @@ async function deleteConvertedCampaign(index) {
     if (confirm('Are you sure you want to delete this campaign?')) {
         const campaign = appData.convertedCampaigns[index];
         appData.convertedCampaigns.splice(index, 1);
+        
+        addActivity('campaign', `<strong>${currentUser.name}</strong> deleted campaign: <strong>${campaign.campaignName}</strong>`, 'campaign');
         
         await saveAppData();
         refreshAllData();
@@ -1015,13 +1430,13 @@ function refreshRunningCampaignsTable() {
             <td>${campaign.isRetainer ? '<i class="fas fa-check-circle text-success"></i> Yes' : '<i class="fas fa-times-circle text-danger"></i> No'}</td>
             <td>${formatDate(campaign.startDate)}</td>
             <td>
-                <button class="btn btn-sm btn-success" onclick="moveToLive(${index})">
+                <button class="btn btn-sm btn-success" onclick="moveToLive(${index})" title="Move to Live">
                     <i class="fas fa-broadcast-tower"></i>
                 </button>
-                <button class="btn btn-sm btn-warning" onclick="toggleRetainer(${index})">
+                <button class="btn btn-sm btn-warning" onclick="toggleRetainer(${index})" title="Toggle Retainer">
                     <i class="fas fa-redo"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteRunningCampaign(${index})">
+                <button class="btn btn-sm btn-danger" onclick="deleteRunningCampaign(${index})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -1031,17 +1446,23 @@ function refreshRunningCampaignsTable() {
 
 async function updateRunningStatus(index, newStatus) {
     appData.runningCampaigns[index].currentStatus = newStatus;
+    
+    addActivity('campaign', `<strong>${currentUser.name}</strong> updated <strong>${appData.runningCampaigns[index].campaignName}</strong> status to ${newStatus}`, 'campaign');
+    
     await saveAppData();
     showToast('Campaign status updated', 'success');
 }
 
 async function toggleRetainer(index) {
     appData.runningCampaigns[index].isRetainer = !appData.runningCampaigns[index].isRetainer;
+    
+    const status = appData.runningCampaigns[index].isRetainer ? 'marked as' : 'removed from';
+    addActivity('campaign', `<strong>${currentUser.name}</strong> ${status} retainer: <strong>${appData.runningCampaigns[index].campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     refreshRunningCampaignsTable();
     updateDashboardStats();
     
-    const status = appData.runningCampaigns[index].isRetainer ? 'marked as' : 'removed from';
     showToast(`Campaign ${status} retainer`, 'success');
 }
 
@@ -1070,6 +1491,8 @@ async function moveToLive(index) {
     // Remove from running
     appData.runningCampaigns.splice(index, 1);
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> moved <strong>${campaign.campaignName}</strong> to LIVE!`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -1080,6 +1503,8 @@ async function deleteRunningCampaign(index) {
     if (confirm('Are you sure you want to delete this running campaign?')) {
         const campaign = appData.runningCampaigns[index];
         appData.runningCampaigns.splice(index, 1);
+        
+        addActivity('campaign', `<strong>${currentUser.name}</strong> deleted running campaign: <strong>${campaign.campaignName}</strong>`, 'campaign');
         
         await saveAppData();
         refreshAllData();
@@ -1112,25 +1537,25 @@ function refreshLiveCampaignsGrid() {
             <div class="campaign-card-body">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div>
-                        <p style="font-size: 12px; color: var(--gray-500);">Total Reach</p>
-                        <p style="font-size: 18px; font-weight: 600;">${formatNumber(campaign.totalReach)}</p>
+                        <p style="font-size: 12px; color: var(--text-muted);">Total Reach</p>
+                        <p style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${formatNumber(campaign.totalReach)}</p>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: var(--gray-500);">Engagement</p>
-                        <p style="font-size: 18px; font-weight: 600;">${formatNumber(campaign.totalEngagement)}</p>
+                        <p style="font-size: 12px; color: var(--text-muted);">Engagement</p>
+                        <p style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${formatNumber(campaign.totalEngagement)}</p>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: var(--gray-500);">Total Views</p>
-                        <p style="font-size: 18px; font-weight: 600;">${formatNumber(campaign.totalViews)}</p>
+                        <p style="font-size: 12px; color: var(--text-muted);">Total Views</p>
+                        <p style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${formatNumber(campaign.totalViews)}</p>
                     </div>
                     <div>
-                        <p style="font-size: 12px; color: var(--gray-500);">ROI</p>
-                        <p style="font-size: 18px; font-weight: 600;">${campaign.roi || '-'}</p>
+                        <p style="font-size: 12px; color: var(--text-muted);">ROI</p>
+                        <p style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${campaign.roi || '-'}</p>
                     </div>
                 </div>
                 <div style="margin-top: 16px;">
-                    <p style="font-size: 12px; color: var(--gray-500);">Go Live Date</p>
-                    <p>${formatDate(campaign.goLiveDate)}</p>
+                    <p style="font-size: 12px; color: var(--text-muted);">Go Live Date</p>
+                    <p style="color: var(--text-primary);">${formatDate(campaign.goLiveDate)}</p>
                 </div>
                 ${campaign.isRetainer ? '<span class="status-badge success" style="margin-top: 12px;">Retainer</span>' : ''}
             </div>
@@ -1166,6 +1591,8 @@ async function editLiveCampaign(index) {
     appData.liveCampaigns[index].totalViews = parseInt(views) || 0;
     appData.liveCampaigns[index].roi = roi;
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> updated metrics for <strong>${campaign.campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     refreshLiveCampaignsGrid();
     
@@ -1193,6 +1620,8 @@ async function moveToInvoice(index) {
     
     // Remove from live campaigns
     appData.liveCampaigns.splice(index, 1);
+    
+    addActivity('campaign', `<strong>${currentUser.name}</strong> moved <strong>${campaign.campaignName}</strong> to Invoice Stage`, 'campaign');
     
     await saveAppData();
     refreshAllData();
@@ -1232,10 +1661,10 @@ function refreshInvoiceTable() {
                 </select>
             </td>
             <td>
-                <button class="btn btn-sm btn-secondary" onclick="editInvoice(${index})">
+                <button class="btn btn-sm btn-secondary" onclick="editInvoice(${index})" title="Edit">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteInvoice(${index})">
+                <button class="btn btn-sm btn-danger" onclick="deleteInvoice(${index})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -1245,12 +1674,19 @@ function refreshInvoiceTable() {
 
 async function toggleInvoiced(index, checked) {
     appData.invoices[index].isInvoiced = checked;
+    
+    const status = checked ? 'sent' : 'unmarked';
+    addActivity('campaign', `<strong>${currentUser.name}</strong> marked invoice as ${status} for <strong>${appData.invoices[index].campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     showToast('Invoice status updated', 'success');
 }
 
 async function updateInvoiceStatus(index, newStatus) {
     appData.invoices[index].invoiceStatus = newStatus;
+    
+    addActivity('campaign', `<strong>${currentUser.name}</strong> updated invoice status to ${newStatus} for <strong>${appData.invoices[index].campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     showToast('Invoice status updated', 'success');
 }
@@ -1261,6 +1697,9 @@ async function editInvoice(index) {
     
     if (amount !== null) {
         appData.invoices[index].invoiceAmount = parseFloat(amount) || 0;
+        
+        addActivity('campaign', `<strong>${currentUser.name}</strong> updated invoice amount for <strong>${invoice.campaignName}</strong>`, 'campaign');
+        
         await saveAppData();
         refreshInvoiceTable();
         showToast('Invoice updated', 'success');
@@ -1271,6 +1710,8 @@ async function deleteInvoice(index) {
     if (confirm('Are you sure you want to delete this invoice?')) {
         const invoice = appData.invoices[index];
         appData.invoices.splice(index, 1);
+        
+        addActivity('campaign', `<strong>${currentUser.name}</strong> deleted invoice for <strong>${invoice.campaignName}</strong>`, 'campaign');
         
         await saveAppData();
         refreshAllData();
@@ -1372,11 +1813,12 @@ function refreshCreatorDatabase() {
             </tr>
         `;
         updateBookmarkedBar();
+        populateStateFilter();
         return;
     }
     
     tbody.innerHTML = appData.creators.map((creator, index) => `
-        <tr>
+        <tr data-index="${index}">
             <td><input type="checkbox" class="creator-select" data-index="${index}"></td>
             <td>
                 <button class="bookmark-btn ${isBookmarked(index) ? 'active' : ''}" onclick="toggleBookmark(${index})">
@@ -1384,20 +1826,20 @@ function refreshCreatorDatabase() {
                 </button>
             </td>
             <td><strong>${creator.name}</strong></td>
-            <td><a href="${creator.link}" target="_blank">@${creator.username}</a></td>
+            <td><a href="${creator.link}" target="_blank" style="color: var(--primary-color);">@${creator.username}</a></td>
             <td>${formatNumber(creator.followers)}</td>
             <td><span class="status-badge ${getCategoryClass(creator.category)}">${creator.category}</span></td>
             <td>${creator.niche}</td>
-            <td>${creator.subniche}</td>
+            <td>${creator.subniche || '-'}</td>
             <td>${creator.state}</td>
             <td>${creator.city}</td>
             <td>${creator.gender}</td>
             <td>${creator.contactNo || creator.email}</td>
             <td>
-                <button class="btn btn-sm btn-secondary" onclick="editCreator(${index})">
+                <button class="btn btn-sm btn-secondary" onclick="editCreator(${index})" title="Edit">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteCreator(${index})">
+                <button class="btn btn-sm btn-danger" onclick="deleteCreator(${index})" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -1405,38 +1847,33 @@ function refreshCreatorDatabase() {
     `).join('');
     
     updateBookmarkedBar();
-    initCreatorFilters();
+    populateStateFilter();
 }
 
-function initCreatorFilters() {
-    // Search filter
-    document.getElementById('creatorSearchInput').addEventListener('input', filterCreators);
-    
-    // Dropdown filters
-    document.getElementById('filterNiche').addEventListener('change', filterCreators);
-    document.getElementById('filterCategory').addEventListener('change', filterCreators);
-    document.getElementById('filterGender').addEventListener('change', filterCreators);
-    document.getElementById('filterState').addEventListener('change', filterCreators);
-    
-    // Populate state filter
+function populateStateFilter() {
     const states = [...new Set(appData.creators.map(c => c.state).filter(s => s))];
     const stateSelect = document.getElementById('filterState');
-    stateSelect.innerHTML = '<option value="">All States</option>' + 
-        states.map(s => `<option value="${s}">${s}</option>`).join('');
+    
+    if (stateSelect) {
+        stateSelect.innerHTML = '<option value="">All States</option>' + 
+            states.sort().map(s => `<option value="${s}">${s}</option>`).join('');
+    }
 }
 
 function filterCreators() {
-    const searchTerm = document.getElementById('creatorSearchInput').value.toLowerCase();
-    const nicheFilter = document.getElementById('filterNiche').value;
-    const categoryFilter = document.getElementById('filterCategory').value;
-    const genderFilter = document.getElementById('filterGender').value;
-    const stateFilter = document.getElementById('filterState').value;
+    const searchTerm = document.getElementById('creatorSearchInput')?.value.toLowerCase() || '';
+    const nicheFilter = document.getElementById('filterNiche')?.value || '';
+    const categoryFilter = document.getElementById('filterCategory')?.value || '';
+    const genderFilter = document.getElementById('filterGender')?.value || '';
+    const stateFilter = document.getElementById('filterState')?.value || '';
     
-    const rows = document.querySelectorAll('#creatorDatabaseTableBody tr');
+    const rows = document.querySelectorAll('#creatorDatabaseTableBody tr[data-index]');
     
-    appData.creators.forEach((creator, index) => {
-        const row = rows[index];
-        if (!row) return;
+    rows.forEach((row) => {
+        const index = parseInt(row.dataset.index);
+        const creator = appData.creators[index];
+        
+        if (!creator) return;
         
         const matchesSearch = 
             creator.name.toLowerCase().includes(searchTerm) ||
@@ -1497,6 +1934,8 @@ function updateBookmarkedBar() {
     const bar = document.getElementById('bookmarkedCreatorsBar');
     const list = document.getElementById('bookmarkedList');
     const count = document.getElementById('bookmarkCount');
+    
+    if (!bar || !list || !count) return;
     
     if (appData.bookmarkedCreators.length === 0) {
         bar.style.display = 'none';
@@ -1611,6 +2050,8 @@ async function exportBookmarksToCampaign() {
         }
         targetCampaign.creators.push(...creatorsToExport);
         
+        addActivity('creator', `<strong>${currentUser.name}</strong> added ${creatorsToExport.length} creators to <strong>${targetCampaign.campaignName}</strong>`, 'creator');
+        
         // Clear bookmarks
         appData.bookmarkedCreators = [];
         
@@ -1717,6 +2158,8 @@ async function addSelectedCreatorsToCampaign() {
         }
         targetCampaign.creators.push(...selectedCreators);
         
+        addActivity('creator', `<strong>${currentUser.name}</strong> added ${selectedCreators.length} creators to <strong>${targetCampaign.campaignName}</strong>`, 'creator');
+        
         await saveAppData();
         refreshAllData();
         
@@ -1793,9 +2236,6 @@ function parseCSV(content) {
     
     // Parse header
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    
-    // Expected headers
-    const expectedHeaders = ['name', 'link', 'username', 'followers', 'niche', 'subniche', 'category', 'state', 'city', 'contact no', 'email', 'gender'];
     
     // Parse data rows
     csvData = [];
@@ -1893,8 +2333,12 @@ async function processCSVUpload() {
         return;
     }
     
+    const count = csvData.length;
+    
     // Add all creators
     appData.creators.push(...csvData);
+    
+    addActivity('creator', `<strong>${currentUser.name}</strong> uploaded ${count} creators via CSV`, 'creator');
     
     await saveAppData();
     refreshAllData();
@@ -1906,7 +2350,7 @@ async function processCSVUpload() {
     document.getElementById('csvFileInput').value = '';
     
     closeModal('csvUploadModal');
-    showToast(`${csvData.length} creators uploaded successfully`, 'success');
+    showToast(`${count} creators uploaded successfully`, 'success');
 }
 
 function downloadCSVTemplate() {
@@ -1952,7 +2396,7 @@ function updateSubnicheOptions() {
 }
 
 function autoCalculateCategory() {
-    const followersInput = document.querySelector('#addCreatorForm input[name="followers"]');
+    const followersInput = document.getElementById('creatorFollowers');
     const categoryInput = document.getElementById('creatorCategory');
     
     if (followersInput && categoryInput) {
@@ -1989,6 +2433,8 @@ async function saveCreator() {
     
     appData.creators.push(creator);
     
+    addActivity('creator', `<strong>${currentUser.name}</strong> added creator: <strong>${creator.name}</strong>`, 'creator');
+    
     await saveAppData();
     refreshAllData();
     
@@ -2015,6 +2461,8 @@ async function editCreator(index) {
     appData.creators[index].followers = parseInt(followers) || 0;
     appData.creators[index].category = calculateCategory(parseInt(followers) || 0);
     
+    addActivity('creator', `<strong>${currentUser.name}</strong> updated creator: <strong>${name}</strong>`, 'creator');
+    
     await saveAppData();
     refreshCreatorDatabase();
     
@@ -2036,6 +2484,8 @@ async function deleteCreator(index) {
         
         appData.creators.splice(index, 1);
         
+        addActivity('creator', `<strong>${currentUser.name}</strong> deleted creator: <strong>${creator.name}</strong>`, 'creator');
+        
         await saveAppData();
         refreshAllData();
         
@@ -2045,6 +2495,8 @@ async function deleteCreator(index) {
 // ===== User Management =====
 function refreshUserManagement() {
     const container = document.getElementById('userManagementList');
+    
+    if (!container) return;
     
     if (appData.users.length === 0) {
         container.innerHTML = `
@@ -2069,11 +2521,11 @@ function refreshUserManagement() {
             <div style="display: flex; align-items: center; gap: 12px;">
                 <span class="role-badge ${user.role}">${user.role === 'admin' ? 'Admin' : 'User'}</span>
                 <div class="user-card-actions">
-                    <button class="btn btn-sm btn-secondary" onclick="editUser(${index})">
+                    <button class="btn btn-sm btn-secondary" onclick="editUser(${index})" title="Edit">
                         <i class="fas fa-edit"></i>
                     </button>
                     ${user.email !== currentUser.email ? `
-                        <button class="btn btn-sm btn-danger" onclick="deleteUser(${index})">
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser(${index})" title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>
                     ` : ''}
@@ -2113,9 +2565,12 @@ async function saveUser() {
     // Set access control
     appData.accessControl[newUser.id] = creatorDbAccess;
     
+    addActivity('user', `<strong>${currentUser.name}</strong> added new user: <strong>${name}</strong>`, 'user');
+    
     await saveAppData();
     refreshUserManagement();
     refreshAccessControl();
+    refreshTeamMembers();
     
     form.reset();
     closeModal('addUserModal');
@@ -2144,8 +2599,11 @@ async function editUser(index) {
     }
     appData.users[index].role = role.toLowerCase() === 'admin' ? 'admin' : 'user';
     
+    addActivity('user', `<strong>${currentUser.name}</strong> updated user: <strong>${name}</strong>`, 'user');
+    
     await saveAppData();
     refreshUserManagement();
+    refreshTeamMembers();
     
     showToast('User updated successfully', 'success');
 }
@@ -2164,9 +2622,12 @@ async function deleteUser(index) {
         
         appData.users.splice(index, 1);
         
+        addActivity('user', `<strong>${currentUser.name}</strong> deleted user: <strong>${user.name}</strong>`, 'user');
+        
         await saveAppData();
         refreshUserManagement();
         refreshAccessControl();
+        refreshTeamMembers();
         
         showToast(`${user.name} deleted`, 'success');
     }
@@ -2175,6 +2636,8 @@ async function deleteUser(index) {
 // ===== Access Control =====
 function refreshAccessControl() {
     const container = document.getElementById('accessControlList');
+    
+    if (!container) return;
     
     // Filter out admin users (they always have access)
     const nonAdminUsers = appData.users.filter(u => u.role !== 'admin');
@@ -2198,8 +2661,8 @@ function refreshAccessControl() {
                 <div class="access-item-info">
                     <div class="user-card-avatar">${user.name ? user.name.charAt(0).toUpperCase() : 'U'}</div>
                     <div>
-                        <h4 style="font-size: 14px; font-weight: 600;">${user.name}</h4>
-                        <p style="font-size: 13px; color: var(--gray-500);">${user.email}</p>
+                        <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary);">${user.name}</h4>
+                        <p style="font-size: 13px; color: var(--text-secondary);">${user.email}</p>
                     </div>
                 </div>
                 <label class="access-toggle">
@@ -2219,6 +2682,8 @@ async function toggleUserAccess(userId, hasAccess) {
     const user = appData.users.find(u => u.id === userId);
     const status = hasAccess ? 'granted' : 'revoked';
     
+    addActivity('user', `<strong>${currentUser.name}</strong> ${status} Creator Database access for <strong>${user ? user.name : 'user'}</strong>`, 'user');
+    
     showToast(`Creator Database access ${status} for ${user ? user.name : 'user'}`, 'success');
 }
 
@@ -2227,6 +2692,7 @@ function populateDropdowns() {
     populateBrandDropdowns();
     populateCampaignDropdowns();
     populateTeamDropdowns();
+    populateTaskDropdowns();
 }
 
 function populateBrandDropdowns() {
@@ -2300,6 +2766,41 @@ function populateTeamDropdowns() {
     });
 }
 
+function populateTaskDropdowns() {
+    // Brand dropdown for tasks
+    const taskBrandSelect = document.getElementById('taskLinkedBrand');
+    if (taskBrandSelect) {
+        taskBrandSelect.innerHTML = '<option value="">Select Brand (Optional)</option>' +
+            appData.brands.map(brand => `
+                <option value="${brand.brandName}">${brand.brandName}</option>
+            `).join('');
+    }
+    
+    // Campaign dropdown for tasks
+    const taskCampaignSelect = document.getElementById('taskLinkedCampaign');
+    if (taskCampaignSelect) {
+        const allCampaigns = [
+            ...appData.convertedCampaigns,
+            ...appData.runningCampaigns,
+            ...appData.liveCampaigns
+        ];
+        
+        taskCampaignSelect.innerHTML = '<option value="">Select Campaign (Optional)</option>' +
+            allCampaigns.map(campaign => `
+                <option value="${campaign.campaignName}">${campaign.campaignName}</option>
+            `).join('');
+    }
+    
+    // Assign to dropdown for tasks
+    const taskAssignSelect = document.getElementById('taskAssignTo');
+    if (taskAssignSelect) {
+        taskAssignSelect.innerHTML = '<option value="">Select Team Member</option>' +
+            appData.users.map(user => `
+                <option value="${user.name}">${user.name}</option>
+            `).join('');
+    }
+}
+
 // ===== Auto-fill Functions =====
 function autoFillBrandDetails(type) {
     let brandSelect, pocNameInput, pocEmailInput, pocNumberInput, budgetInput;
@@ -2369,7 +2870,7 @@ function autoFillCampaignDetails(type) {
     }
 }
 
-// ===== Save Form Functions =====
+// ===== Save Brand =====
 async function saveBrand() {
     const form = document.getElementById('addBrandForm');
     const formData = new FormData(form);
@@ -2391,6 +2892,8 @@ async function saveBrand() {
     // Auto-add to respective status table
     addToStatusTable(brand, brand.status);
     
+    addActivity('brand', `<strong>${currentUser.name}</strong> added new brand: <strong>${brand.brandName}</strong>`, 'brand');
+    
     await saveAppData();
     refreshAllData();
     
@@ -2400,6 +2903,54 @@ async function saveBrand() {
     showToast(`${brand.brandName} added successfully`, 'success');
 }
 
+async function editBrand(index) {
+    const brand = appData.brands[index];
+    
+    const brandName = prompt('Brand Name:', brand.brandName);
+    if (brandName === null) return;
+    
+    const pocName = prompt('POC Name:', brand.pocName);
+    if (pocName === null) return;
+    
+    const pocEmail = prompt('POC Email:', brand.pocEmail);
+    if (pocEmail === null) return;
+    
+    const pocNumber = prompt('POC Number:', brand.pocNumber);
+    if (pocNumber === null) return;
+    
+    appData.brands[index].brandName = brandName;
+    appData.brands[index].pocName = pocName;
+    appData.brands[index].pocEmail = pocEmail;
+    appData.brands[index].pocNumber = pocNumber;
+    
+    addActivity('brand', `<strong>${currentUser.name}</strong> updated brand: <strong>${brandName}</strong>`, 'brand');
+    
+    await saveAppData();
+    refreshAllData();
+    
+    showToast('Brand updated successfully', 'success');
+}
+
+async function deleteBrand(index) {
+    const brand = appData.brands[index];
+    
+    if (confirm(`Are you sure you want to delete ${brand.brandName}? This will also remove it from all pipeline stages.`)) {
+        // Remove from all status tables
+        removeFromStatusTable(brand, brand.status);
+        
+        // Remove from brands
+        appData.brands.splice(index, 1);
+        
+        addActivity('brand', `<strong>${currentUser.name}</strong> deleted brand: <strong>${brand.brandName}</strong>`, 'brand');
+        
+        await saveAppData();
+        refreshAllData();
+        
+        showToast(`${brand.brandName} deleted`, 'success');
+    }
+}
+
+// ===== Save Hot Brand =====
 async function saveHotBrand() {
     const form = document.getElementById('addHotBrandForm');
     const formData = new FormData(form);
@@ -2409,6 +2960,12 @@ async function saveHotBrand() {
     
     if (!brand) {
         showToast('Please select a brand', 'error');
+        return;
+    }
+    
+    // Check if already exists
+    if (appData.hotBrands.find(b => b.brandId === brandId)) {
+        showToast('This brand is already in Hot Brands', 'error');
         return;
     }
     
@@ -2427,16 +2984,12 @@ async function saveHotBrand() {
         createdAt: new Date().toISOString()
     };
     
-    // Check if already exists
-    if (appData.hotBrands.find(b => b.brandId === brandId)) {
-        showToast('This brand is already in Hot Brands', 'error');
-        return;
-    }
-    
     appData.hotBrands.push(hotBrand);
     
     // Update main brand status
     brand.status = 'Hot Brands';
+    
+    addActivity('brand', `<strong>${currentUser.name}</strong> added <strong>${brand.brandName}</strong> to Hot Brands`, 'brand');
     
     await saveAppData();
     refreshAllData();
@@ -2447,6 +3000,7 @@ async function saveHotBrand() {
     showToast(`${brand.brandName} added to Hot Brands`, 'success');
 }
 
+// ===== Save Warm Brand =====
 async function saveWarmBrand() {
     const form = document.getElementById('addWarmBrandForm');
     const formData = new FormData(form);
@@ -2456,6 +3010,12 @@ async function saveWarmBrand() {
     
     if (!brand) {
         showToast('Please select a brand', 'error');
+        return;
+    }
+    
+    // Check if already exists
+    if (appData.warmBrands.find(b => b.brandId === brandId)) {
+        showToast('This brand is already in Warm Brands', 'error');
         return;
     }
     
@@ -2474,16 +3034,12 @@ async function saveWarmBrand() {
         createdAt: new Date().toISOString()
     };
     
-    // Check if already exists
-    if (appData.warmBrands.find(b => b.brandId === brandId)) {
-        showToast('This brand is already in Warm Brands', 'error');
-        return;
-    }
-    
     appData.warmBrands.push(warmBrand);
     
     // Update main brand status
     brand.status = 'Warm Brands';
+    
+    addActivity('brand', `<strong>${currentUser.name}</strong> added <strong>${brand.brandName}</strong> to Warm Brands`, 'brand');
     
     await saveAppData();
     refreshAllData();
@@ -2494,6 +3050,7 @@ async function saveWarmBrand() {
     showToast(`${brand.brandName} added to Warm Brands`, 'success');
 }
 
+// ===== Save Converted Campaign =====
 async function saveConvertedCampaign() {
     const form = document.getElementById('addConvertedCampaignForm');
     const formData = new FormData(form);
@@ -2526,6 +3083,8 @@ async function saveConvertedCampaign() {
     brand.status = 'Converted to Campaign';
     brand.campaignName = campaign.campaignName;
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> created campaign: <strong>${campaign.campaignName}</strong> for ${brand.brandName}`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -2535,6 +3094,7 @@ async function saveConvertedCampaign() {
     showToast(`Campaign "${campaign.campaignName}" created`, 'success');
 }
 
+// ===== Save Running Campaign =====
 async function saveRunningCampaign() {
     const form = document.getElementById('addRunningCampaignForm');
     const formData = new FormData(form);
@@ -2570,6 +3130,8 @@ async function saveRunningCampaign() {
         appData.convertedCampaigns.splice(index, 1);
     }
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> started running campaign: <strong>${runningCampaign.campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -2579,6 +3141,7 @@ async function saveRunningCampaign() {
     showToast(`${runningCampaign.campaignName} is now running`, 'success');
 }
 
+// ===== Save Live Campaign =====
 async function saveLiveCampaign() {
     const form = document.getElementById('addLiveCampaignForm');
     const formData = new FormData(form);
@@ -2617,6 +3180,8 @@ async function saveLiveCampaign() {
         appData.runningCampaigns.splice(index, 1);
     }
     
+    addActivity('campaign', `<strong>${currentUser.name}</strong> made campaign LIVE: <strong>${liveCampaign.campaignName}</strong>`, 'campaign');
+    
     await saveAppData();
     refreshAllData();
     
@@ -2626,6 +3191,7 @@ async function saveLiveCampaign() {
     showToast(`${liveCampaign.campaignName} is now LIVE!`, 'success');
 }
 
+// ===== Save Invoice =====
 async function saveInvoice() {
     const form = document.getElementById('addInvoiceForm');
     const formData = new FormData(form);
@@ -2653,6 +3219,8 @@ async function saveInvoice() {
     };
     
     appData.invoices.push(invoice);
+    
+    addActivity('campaign', `<strong>${currentUser.name}</strong> created invoice for: <strong>${invoice.campaignName}</strong>`, 'campaign');
     
     await saveAppData();
     refreshAllData();
@@ -2689,6 +3257,8 @@ document.addEventListener('click', function(e) {
 // ===== Toast Notifications =====
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
+    
+    if (!container) return;
     
     const icons = {
         success: 'fa-check-circle',
@@ -2736,6 +3306,8 @@ function formatDate(dateString) {
 function formatNumber(num) {
     if (!num) return '0';
     
+    num = parseInt(num);
+    
     if (num >= 1000000) {
         return (num / 1000000).toFixed(1) + 'M';
     }
@@ -2782,49 +3354,5 @@ function getCategoryClass(category) {
     return classes[category] || 'info';
 }
 
-// ===== Edit/Delete Brand Functions =====
-async function editBrand(index) {
-    const brand = appData.brands[index];
-    
-    const brandName = prompt('Brand Name:', brand.brandName);
-    if (brandName === null) return;
-    
-    const pocName = prompt('POC Name:', brand.pocName);
-    if (pocName === null) return;
-    
-    const pocEmail = prompt('POC Email:', brand.pocEmail);
-    if (pocEmail === null) return;
-    
-    const pocNumber = prompt('POC Number:', brand.pocNumber);
-    if (pocNumber === null) return;
-    
-    appData.brands[index].brandName = brandName;
-    appData.brands[index].pocName = pocName;
-    appData.brands[index].pocEmail = pocEmail;
-    appData.brands[index].pocNumber = pocNumber;
-    
-    await saveAppData();
-    refreshAllData();
-    
-    showToast('Brand updated successfully', 'success');
-}
-
-async function deleteBrand(index) {
-    const brand = appData.brands[index];
-    
-    if (confirm(`Are you sure you want to delete ${brand.brandName}? This will also remove it from all pipeline stages.`)) {
-        // Remove from all status tables
-        removeFromStatusTable(brand, brand.status);
-        
-        // Remove from brands
-        appData.brands.splice(index, 1);
-        
-        await saveAppData();
-        refreshAllData();
-        
-        showToast(`${brand.brandName} deleted`, 'success');
-    }
-}
-
 // ===== Initialize on page load =====
-console.log('RAF Campaign Tool - App.js Loaded');
+console.log('RAF Campaign Tool - App.js Loaded Successfully!');
