@@ -50,30 +50,19 @@
     </div>
 
     <script>
-        // HARDCODED USERS TO FIX LOGIN ISSUE ACROSS DEVICES
+        // HARDCODED USERS - EDIT THIS LIST TO ADD TEAM MEMBERS
         const STATIC_USERS = [
-            { email: 'admin@aflog.in', password: 'admin@2024', name: 'Admin User', role: 'admin' },
-            { email: 'team@aflog.in', password: 'team@2024', name: 'Team Member', role: 'Team Member' }
+            { email: 'admin@aflog.in', password: 'admin@2024', name: 'Admin', role: 'admin' },
+            { email: 'rahul@aflog.in', password: 'rahul@123', name: 'Rahul', role: 'Campaign Manager' },
+            { email: 'priya@aflog.in', password: 'priya@123', name: 'Priya', role: 'Sales Lead' },
+            { email: 'mike@aflog.in', password: 'mike@123', name: 'Mike', role: 'Brand Strategist' },
+            { email: 'sarah@aflog.in', password: 'sarah@123', name: 'Sarah', role: 'Account Manager' }
         ];
-
-        // Merge static users with local storage users
-        function getAllUsers() {
-            const localUsers = JSON.parse(localStorage.getItem('aflog_users')) || [];
-            // Combine arrays, avoiding duplicates based on email
-            const allUsers = [...STATIC_USERS];
-            localUsers.forEach(localUser => {
-                if (!allUsers.find(u => u.email === localUser.email)) {
-                    allUsers.push(localUser);
-                }
-            });
-            return allUsers;
-        }
 
         const loginForm = document.getElementById('login-form');
         const errorMessage = document.getElementById('error-message');
         const errorText = document.getElementById('error-text');
 
-        // Check if already logged in
         if (localStorage.getItem('aflog_logged_in') === 'true') {
             window.location.href = 'dashboard.html';
         }
@@ -82,9 +71,9 @@
             e.preventDefault();
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
-            const users = getAllUsers();
             
-            const validUser = users.find(u => u.email.toLowerCase() === email && u.password === password);
+            // Check hardcoded users first
+            const validUser = STATIC_USERS.find(u => u.email === email && u.password === password);
 
             if (validUser) {
                 localStorage.setItem('aflog_logged_in', 'true');
