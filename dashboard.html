@@ -9,80 +9,301 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Auth Check -->
     <script>
-        if (localStorage.getItem('aflog_logged_in') !== 'true') window.location.href = 'index.html';
+        if (localStorage.getItem('aflog_logged_in') !== 'true') {
+            window.location.href = 'index.html';
+        }
     </script>
 
     <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-header"><div class="logo"><i class="fas fa-rocket"></i><span>Aflog CMS</span></div></div>
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+                <span>Aflog CMS</span>
+            </div>
+        </div>
+        
         <nav class="sidebar-nav">
             <div class="nav-section">
                 <span class="nav-section-title">Dashboard</span>
-                <a href="#" class="nav-item active" data-view="dashboard"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
-                <a href="#" class="nav-item" data-view="my-tasks"><i class="fas fa-tasks"></i><span>My Tasks</span></a>
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item" data-view="my-tasks">
+                    <i class="fas fa-tasks"></i>
+                    <span>My Tasks</span>
+                    <span class="badge task-badge" id="badge-my-tasks">0</span>
+                </a>
             </div>
+            
             <div class="nav-section">
                 <span class="nav-section-title">Pipeline Stages</span>
-                <a href="#" class="nav-item" data-view="brands"><i class="fas fa-building"></i><span>All Brands</span><span class="badge" id="badge-brands">0</span></a>
-                <a href="#" class="nav-item" data-view="hot"><i class="fas fa-fire"></i><span>Hot Brands</span><span class="badge hot" id="badge-hot">0</span></a>
-                <a href="#" class="nav-item" data-view="warm"><i class="fas fa-temperature-half"></i><span>Warm Brands</span><span class="badge warm" id="badge-warm">0</span></a>
-                <a href="#" class="nav-item" data-view="lost"><i class="fas fa-heart-crack"></i><span>Lost Brands</span><span class="badge lost" id="badge-lost">0</span></a>
+                <a href="#" class="nav-item" data-view="brands">
+                    <i class="fas fa-building"></i>
+                    <span>All Brands</span>
+                    <span class="badge" id="badge-brands">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="hot">
+                    <i class="fas fa-fire"></i>
+                    <span>Hot Brands</span>
+                    <span class="badge hot" id="badge-hot">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="warm">
+                    <i class="fas fa-temperature-half"></i>
+                    <span>Warm Brands</span>
+                    <span class="badge warm" id="badge-warm">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="lost">
+                    <i class="fas fa-heart-crack"></i>
+                    <span>Lost Brands</span>
+                    <span class="badge lost" id="badge-lost">0</span>
+                </a>
             </div>
+            
             <div class="nav-section">
                 <span class="nav-section-title">Campaigns</span>
-                <a href="#" class="nav-item" data-view="converted"><i class="fas fa-exchange-alt"></i><span>Converted to Campaign</span></a>
-                <a href="#" class="nav-item" data-view="campaigns"><i class="fas fa-bullhorn"></i><span>All Campaigns</span><span class="badge running" id="badge-campaigns">0</span></a>
-                <a href="#" class="nav-item" data-view="running"><i class="fas fa-play-circle"></i><span>Running</span><span class="badge running" id="badge-running">0</span></a>
-                <a href="#" class="nav-item" data-view="live"><i class="fas fa-broadcast-tower"></i><span>Live</span><span class="badge live" id="badge-live">0</span></a>
-                <a href="#" class="nav-item" data-view="invoice"><i class="fas fa-file-invoice-dollar"></i><span>Invoice Stage</span></a>
+                <a href="#" class="nav-item" data-view="converted">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Converted</span>
+                    <span class="badge converted" id="badge-converted">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="campaigns">
+                    <i class="fas fa-bullhorn"></i>
+                    <span>All Campaigns</span>
+                    <span class="badge running" id="badge-campaigns">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="running">
+                    <i class="fas fa-play-circle"></i>
+                    <span>Running</span>
+                    <span class="badge running" id="badge-running">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="live">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <span>Live</span>
+                    <span class="badge live" id="badge-live">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="invoice">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Invoice Stage</span>
+                    <span class="badge invoice" id="badge-invoice">0</span>
+                </a>
             </div>
+
             <div class="nav-section">
                 <span class="nav-section-title">Resources</span>
-                <a href="#" class="nav-item admin-only" data-view="creators"><i class="fas fa-user-star"></i><span>Creator Database</span></a>
-                <a href="#" class="nav-item admin-only" data-view="manage-team"><i class="fas fa-users"></i><span>Manage Team</span></a>
+                <a href="#" class="nav-item admin-only" data-view="creators">
+                    <i class="fas fa-user-star"></i>
+                    <span>Creator Database</span>
+                    <span class="badge" id="badge-creators">0</span>
+                </a>
+                <a href="#" class="nav-item admin-only" data-view="manage-team">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Manage Team</span>
+                </a>
             </div>
+            
             <div class="nav-section">
                 <span class="nav-section-title">Settings</span>
-                <a href="#" class="nav-item" id="airtable-settings"><i class="fas fa-database"></i><span>Airtable Sync</span></a>
-                <a href="#" class="nav-item" id="logout-btn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+                <a href="#" class="nav-item" id="airtable-settings">
+                    <i class="fas fa-database"></i>
+                    <span>Airtable Sync</span>
+                </a>
+                <a href="#" class="nav-item" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
             </div>
         </nav>
+        
         <div class="sidebar-footer">
-            <div class="user-info"><img src="" alt="User" id="user-avatar"><div class="user-details"><span class="user-name" id="current-user">User</span><span class="user-role" id="current-role">Role</span></div></div>
+            <div class="user-info">
+                <img src="" alt="User" id="user-avatar">
+                <div class="user-details">
+                    <span class="user-name" id="current-user">User</span>
+                    <span class="user-role" id="current-role">Team Member</span>
+                </div>
+            </div>
         </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Top Bar -->
         <header class="top-bar">
-            <div class="search-container"><i class="fas fa-search"></i><input type="text" id="global-search" placeholder="Search brands, campaigns, creators..."></div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="global-search" placeholder="Search brands, campaigns, creators...">
+            </div>
             <div class="top-bar-actions">
-                <button class="btn btn-secondary" id="add-task-btn"><i class="fas fa-plus"></i> Add Task</button>
-                <button class="btn btn-primary" id="add-brand-btn"><i class="fas fa-plus"></i> Add Brand</button>
+                <button class="btn btn-secondary" id="add-task-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Task</span>
+                </button>
+                <button class="btn btn-primary" id="add-brand-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Brand</span>
+                </button>
+                <div class="user-profile" id="header-profile">
+                    <img src="" alt="User">
+                </div>
             </div>
         </header>
 
-        <!-- DASHBOARD VIEW -->
+        <!-- Dashboard View -->
         <section id="view-dashboard" class="view active">
-            <div class="view-header"><h1>Analytics Dashboard</h1></div>
+            <div class="view-header">
+                <h1>Analytics Dashboard</h1>
+                <p>Overview of your brand pipeline and campaigns</p>
+            </div>
+            
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-building"></i></div><div class="stat-info"><span class="stat-value" id="stat-total">0</span><span class="stat-label">Total Brands</span></div></div>
-                <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-fire"></i></div><div class="stat-info"><span class="stat-value" id="stat-hot">0</span><span class="stat-label">Hot Brands</span></div></div>
-                <div class="stat-card"><div class="stat-icon green"><i class="fas fa-bullhorn"></i></div><div class="stat-info"><span class="stat-value" id="stat-campaigns">0</span><span class="stat-label">Active Campaigns</span></div></div>
-                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-user-star"></i></div><div class="stat-info"><span class="stat-value" id="stat-creators">0</span><span class="stat-label">Creators</span></div></div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-building"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-total">0</span><span class="stat-label">Total Brands</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-fire"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-hot">0</span><span class="stat-label">Hot Brands</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-bullhorn"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-campaigns">0</span><span class="stat-label">Active Campaigns</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-creators">0</span><span class="stat-label">Total Creators</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon teal"><i class="fas fa-video"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-content-live">0</span><span class="stat-label">Content Live</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-sync"></i></div>
+                    <div class="stat-info"><span class="stat-value" id="stat-revisions">0</span><span class="stat-label">Pending Revisions</span></div>
+                </div>
+            </div>
+
+            <div class="dashboard-charts">
+                <div class="chart-card">
+                    <h3>Pipeline Distribution</h3>
+                    <div class="pipeline-bars" id="pipeline-bars"></div>
+                </div>
+                <div class="chart-card">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list" id="activity-list"></div>
+                </div>
             </div>
         </section>
 
-        <!-- CREATOR DATABASE VIEW (Restricted) -->
+        <!-- Brands View -->
+        <section id="view-brands" class="view">
+            <div class="view-header"><h1>All Brands</h1><p>Master list of all brands</p></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Brand Name</th><th>POC Name</th><th>POC Email</th><th>Budget Status</th><th>Status</th><th>Campaigns</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-brands"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Hot Brands View -->
+        <section id="view-hot" class="view">
+            <div class="view-header"><h1>Hot Brands</h1></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Brand Name</th><th>POC Name</th><th>POC Email</th><th>Budget</th><th>Pipeline Status</th><th>Aflog POC</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-hot"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Warm Brands View -->
+        <section id="view-warm" class="view">
+            <div class="view-header"><h1>Warm Brands</h1></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Brand Name</th><th>POC Name</th><th>POC Email</th><th>Budget</th><th>Pipeline Status</th><th>Aflog POC</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-warm"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Lost Brands View -->
+        <section id="view-lost" class="view">
+            <div class="view-header"><h1>Lost Brands</h1></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Brand Name</th><th>POC Name</th><th>POC Email</th><th>Budget</th><th>Comments</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-lost"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Converted View -->
+        <section id="view-converted" class="view">
+            <div class="view-header"><h1>Converted to Campaign</h1></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Brand Name</th><th>POC Name</th><th>POC Email</th><th>Budget</th><th>Campaigns</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-converted"></tbody>
+                </table>
+            </div>
+        </section>
+          <!-- All Campaigns View -->
+        <section id="view-campaigns" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div><h1><i class="fas fa-bullhorn"></i> All Campaigns</h1><p>View and manage all campaigns</p></div>
+                </div>
+            </div>
+            <div class="campaigns-list-container" id="all-campaigns-list"></div>
+        </section>
+
+        <!-- Campaign Running View -->
+        <section id="view-running" class="view">
+            <div class="view-header"><h1><i class="fas fa-play-circle"></i> Campaigns Running</h1></div>
+            <div class="campaigns-list-container" id="running-campaigns-list"></div>
+        </section>
+
+        <!-- Campaign Live View -->
+        <section id="view-live" class="view">
+            <div class="view-header"><h1><i class="fas fa-broadcast-tower"></i> Campaigns Live</h1></div>
+            <div class="campaigns-list-container" id="live-campaigns-list"></div>
+        </section>
+
+        <!-- Invoice Stage View -->
+        <section id="view-invoice" class="view">
+            <div class="view-header"><h1><i class="fas fa-file-invoice-dollar"></i> Invoice Stage</h1></div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead><tr><th>Status</th><th>Brand Name</th><th>Campaign</th><th>Creators</th><th>Content Live</th><th>Invoiced</th><th>Invoice Status</th><th>Amount</th><th>Actions</th></tr></thead>
+                    <tbody id="tbody-invoice"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CREATOR DATABASE VIEW (UPDATED) -->
         <section id="view-creators" class="view">
             <div class="view-header">
                 <div class="view-header-row">
-                    <div><h1><i class="fas fa-user-star"></i> Creator Database</h1><p>Restricted to Admins</p></div>
+                    <div>
+                        <h1><i class="fas fa-user-star"></i> Creator Database</h1>
+                        <p>Restricted Access (Admins Only)</p>
+                    </div>
                     <div class="action-btns">
-                        <button class="btn btn-outline" id="export-selected-btn" style="display:none;"><i class="fas fa-share-square"></i> Export Selected</button>
-                        <button class="btn btn-secondary" id="bulk-upload-btn"><i class="fas fa-file-csv"></i> Bulk Upload CSV</button>
-                        <button class="btn btn-primary" id="add-creator-db-btn"><i class="fas fa-plus"></i> Add Creator</button>
+                        <!-- NEW BUTTONS -->
+                        <button class="btn btn-outline" id="export-selected-btn" style="display:none;">
+                            <i class="fas fa-share-square"></i> Export to Campaign
+                        </button>
+                        <button class="btn btn-secondary" id="bulk-upload-btn">
+                            <i class="fas fa-file-csv"></i> Bulk Upload CSV
+                        </button>
+                        <button class="btn btn-primary" id="add-creator-db-btn">
+                            <i class="fas fa-user-plus"></i> Add Creator
+                        </button>
                     </div>
                 </div>
             </div>
@@ -95,57 +316,129 @@
                     <option value="Macro">Macro (<550k)</option>
                     <option value="Mega">Mega (>550k)</option>
                 </select>
-                <input type="text" id="filter-creator-search" class="filter-input" placeholder="Search by name or handle...">
+                <input type="text" id="filter-creator-search" class="filter-input" placeholder="Search creators...">
             </div>
             <div class="creators-grid" id="creators-grid"></div>
         </section>
 
-        <!-- OTHER VIEWS -->
-        <section id="view-brands" class="view"><div class="view-header"><h1>All Brands</h1></div><div class="table-container"><table class="data-table"><thead><tr><th>Brand</th><th>POC</th><th>Budget</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbody-brands"></tbody></table></div></section>
-        <section id="view-hot" class="view"><div class="view-header"><h1>Hot Brands</h1></div><div class="table-container"><table class="data-table"><thead><tr><th>Status</th><th>Brand</th><th>POC</th><th>Budget</th><th>Pipeline</th><th>Actions</th></tr></thead><tbody id="tbody-hot"></tbody></table></div></section>
-        <section id="view-warm" class="view"><div class="view-header"><h1>Warm Brands</h1></div><div class="table-container"><table class="data-table"><thead><tr><th>Status</th><th>Brand</th><th>POC</th><th>Budget</th><th>Actions</th></tr></thead><tbody id="tbody-warm"></tbody></table></div></section>
-        <section id="view-lost" class="view"><div class="view-header"><h1>Lost Brands</h1></div><div class="table-container"><table class="data-table"><thead><tr><th>Status</th><th>Brand</th><th>POC</th><th>Comments</th><th>Actions</th></tr></thead><tbody id="tbody-lost"></tbody></table></div></section>
-        <section id="view-converted" class="view"><div class="view-header"><h1>Converted to Campaign</h1></div><div class="table-container"><table class="data-table"><thead><tr><th>Brand</th><th>Budget</th><th>Campaign Name</th><th>Actions</th></tr></thead><tbody id="tbody-converted"></tbody></table></div></section>
-        
-        <section id="view-campaigns" class="view"><div class="view-header"><h1>All Campaigns</h1></div><div class="campaigns-list-container" id="all-campaigns-list"></div></section>
-        <section id="view-running" class="view"><div class="view-header"><h1>Running Campaigns</h1></div><div class="campaigns-list-container" id="running-campaigns-list"></div></section>
-        <section id="view-live" class="view"><div class="view-header"><h1>Live Campaigns</h1></div><div class="campaigns-list-container" id="live-campaigns-list"></div></section>
-        <section id="view-invoice" class="view"><div class="view-header"><h1>Invoice Stage</h1></div><div class="table-container"><table class="data-table"><tbody id="tbody-invoice"></tbody></table></div></section>
-        
-        <section id="view-my-tasks" class="view"><div class="view-header"><h1>My Tasks</h1></div><div class="tasks-board"><div class="task-column" id="col-todo"><h3>To Do</h3><div id="tasks-todo" class="task-list"></div></div><div class="task-column" id="col-progress"><h3>In Progress</h3><div id="tasks-progress" class="task-list"></div></div><div class="task-column" id="col-done"><h3>Completed</h3><div id="tasks-completed" class="task-list"></div></div></div></section>
-        <section id="view-manage-team" class="view"><div class="view-header"><h1>Manage Team</h1><button class="btn btn-primary" id="add-member-btn">Add Member</button></div><div class="table-container"><table class="data-table"><thead><tr><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tbody-team"></tbody></table></div></section>
-        
-        <!-- CAMPAIGN DETAIL VIEW -->
+        <!-- Campaign Detail View -->
         <section id="view-campaign-detail" class="view">
             <div class="view-header">
                 <div class="view-header-row">
-                    <div class="back-header"><button class="btn btn-secondary back-btn" id="back-to-campaigns"><i class="fas fa-arrow-left"></i> Back</button><div><h1 id="cd-title">Campaign Name</h1><p id="cd-subtitle">Brand Name</p></div></div>
-                    <button class="btn btn-primary" id="add-creator-to-campaign-btn"><i class="fas fa-user-plus"></i> Add Creator</button>
+                    <div class="back-header">
+                        <button class="btn btn-secondary back-btn" id="back-to-campaigns"><i class="fas fa-arrow-left"></i> Back</button>
+                        <div><h1 id="campaign-detail-title">Campaign Name</h1><p id="campaign-detail-subtitle">Brand Name</p></div>
+                    </div>
+                    <div class="campaign-actions">
+                        <button class="btn btn-secondary" id="edit-campaign-btn"><i class="fas fa-edit"></i> Edit Campaign</button>
+                        <button class="btn btn-primary" id="add-creator-to-campaign-btn"><i class="fas fa-user-plus"></i> Add Creator</button>
+                    </div>
                 </div>
             </div>
-            <!-- Campaign Stats Row -->
-            <div class="campaign-stats-row" id="cd-stats"></div>
-            <!-- Creators List -->
-            <div class="campaign-creators-list" id="campaign-creators-list"></div>
+            
+            <div class="campaign-stats-row">
+                <div class="campaign-stat-card"><div class="campaign-stat-icon green"><i class="fas fa-check-circle"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-live">0</span><span class="campaign-stat-label">Live</span></div></div>
+                <div class="campaign-stat-card"><div class="campaign-stat-icon orange"><i class="fas fa-clock"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-pending">0</span><span class="campaign-stat-label">Pending</span></div></div>
+                <div class="campaign-stat-card"><div class="campaign-stat-icon blue"><i class="fas fa-sync"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-revision">0</span><span class="campaign-stat-label">In Revision</span></div></div>
+                <div class="campaign-stat-card"><div class="campaign-stat-icon purple"><i class="fas fa-thumbs-up"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-approved">0</span><span class="campaign-stat-label">Good to Go</span></div></div>
+                <div class="campaign-stat-card"><div class="campaign-stat-icon red"><i class="fas fa-user-times"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-dropout">0</span><span class="campaign-stat-label">Dropouts</span></div></div>
+                <div class="campaign-stat-card"><div class="campaign-stat-icon teal"><i class="fas fa-users"></i></div><div class="campaign-stat-info"><span class="campaign-stat-value" id="cstat-total">0</span><span class="campaign-stat-label">Total</span></div></div>
+            </div>
+
+            <div class="campaign-info-bar">
+                <div class="info-item"><i class="fas fa-hashtag"></i><span id="cinfo-platform">Platform</span></div>
+                <div class="info-item"><i class="fas fa-calendar"></i><span id="cinfo-created">Date</span></div>
+                <div class="info-item"><i class="fas fa-rupee-sign"></i><span id="cinfo-budget">Budget</span></div>
+            </div>
+
+            <div class="campaign-creators-section">
+                <h3><i class="fas fa-users"></i> Creators in this Campaign</h3>
+                <div class="campaign-creators-list" id="campaign-creators-list"></div>
+            </div>
+        </section>
+
+        <!-- Brand Campaigns View -->
+        <section id="view-brand-campaigns" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div class="back-header">
+                        <button class="btn btn-secondary back-btn" id="back-to-brands"><i class="fas fa-arrow-left"></i> Back</button>
+                        <div><h1 id="brand-campaigns-title">Brand Campaigns</h1><p id="brand-campaigns-subtitle">Manage campaigns</p></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openCampaignModal()"><i class="fas fa-plus"></i> Add Campaign</button>
+                </div>
+            </div>
+            <div class="brand-campaigns-grid" id="brand-campaigns-grid"></div>
+        </section>
+
+        <!-- My Tasks View -->
+        <section id="view-my-tasks" class="view">
+            <div class="view-header"><h1><i class="fas fa-tasks"></i> My Tasks</h1></div>
+            <div class="tasks-board">
+                <div class="task-column"><div class="task-column-header pending"><h3>To Do</h3><span class="task-count" id="count-todo">0</span></div><div class="task-list" id="tasks-todo"></div></div>
+                <div class="task-column"><div class="task-column-header in-progress"><h3>In Progress</h3><span class="task-count" id="count-progress">0</span></div><div class="task-list" id="tasks-progress"></div></div>
+                <div class="task-column"><div class="task-column-header completed"><h3>Completed</h3><span class="task-count" id="count-completed">0</span></div><div class="task-list" id="tasks-completed"></div></div>
+            </div>
+        </section>
+
+        <!-- Manage Team View -->
+        <section id="view-manage-team" class="view">
+            <div class="view-header">
+                <div class="view-header-row">
+                    <div><h1><i class="fas fa-user-cog"></i> Manage Team</h1></div>
+                    <button class="btn btn-primary" id="add-member-btn"><i class="fas fa-user-plus"></i> Add Member</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Tasks</th><th>Campaigns</th><th>Actions</th></tr></thead><tbody id="tbody-team"></tbody></table>
+            </div>
+        </section>
+
+        <!-- Member Detail View -->
+        <section id="view-member-detail" class="view">
+            <div class="view-header">
+                <div class="member-detail-header">
+                    <button class="btn btn-secondary back-btn" id="back-to-team"><i class="fas fa-arrow-left"></i> Back to Team</button>
+                    <div class="member-info-header">
+                        <img src="" alt="" id="member-detail-avatar" class="member-avatar-large">
+                        <div><h1 id="member-detail-name">Name</h1><p id="member-detail-role">Role</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="member-stats-row">
+                <div class="member-stat-card"><div class="member-stat-value" id="member-stat-tasks">0</div><div class="member-stat-label">Tasks</div></div>
+                <div class="member-stat-card"><div class="member-stat-value" id="member-stat-pending">0</div><div class="member-stat-label">Pending</div></div>
+                <div class="member-stat-card"><div class="member-stat-value" id="member-stat-progress">0</div><div class="member-stat-label">In Progress</div></div>
+                <div class="member-stat-card"><div class="member-stat-value" id="member-stat-completed">0</div><div class="member-stat-label">Completed</div></div>
+                <div class="member-stat-card"><div class="member-stat-value" id="member-stat-campaigns">0</div><div class="member-stat-label">Campaigns</div></div>
+            </div>
+            <div class="member-detail-content">
+                <div class="detail-section"><h3>Tasks</h3><div class="table-container"><table class="data-table"><thead><tr><th>Task</th><th>Brand</th><th>Status</th><th>Due</th><th>Priority</th></tr></thead><tbody id="member-tasks-list"></tbody></table></div></div>
+                <div class="detail-section"><h3>Campaigns</h3><div class="table-container"><table class="data-table"><thead><tr><th>Brand</th><th>Campaign</th><th>Status</th><th>Role</th></tr></thead><tbody id="member-campaigns-list"></tbody></table></div></div>
+            </div>
+        </section>
+        
+        <!-- Team Grid View (Overview) -->
+        <section id="view-team" class="view">
+            <div class="view-header"><h1><i class="fas fa-users"></i> Team Members</h1></div>
+            <div class="team-grid" id="team-grid"></div>
         </section>
     </main>
+    <!-- MODALS -->
 
-    <!-- NEW MODALS -->
-    
-    <!-- Bulk Upload Modal -->
+    <!-- NEW: Bulk Upload Modal -->
     <div class="modal-overlay" id="bulk-upload-modal">
         <div class="modal">
             <div class="modal-header"><h2>Bulk Upload Creators</h2><button class="modal-close" onclick="closeModal('bulk-upload-modal')">×</button></div>
             <div class="form-grid" style="padding: 20px;">
-                <p style="grid-column: 1/-1; color: var(--text-secondary); margin-bottom: 10px;">Upload a CSV file with the following headers (order doesn't matter, headers must match exactly):</p>
-                <code style="grid-column: 1/-1; background: var(--bg-tertiary); padding: 10px; border-radius: 5px; font-size: 0.8rem; margin-bottom: 20px;">Name, Link, Username, Followers, Niche, Subniche, Category, States, City, Contact No, Email, Gender</code>
+                <p style="grid-column: 1/-1; color: var(--text-secondary); margin-bottom: 10px;">Upload CSV with headers: Name, Link, Username, Followers, Niche, Subniche, Category, States, City, Contact No, Email, Gender</p>
                 <div class="form-group full-width"><input type="file" id="csv-file-input" accept=".csv"></div>
             </div>
             <div class="form-actions"><button class="btn btn-primary" onclick="processCSV()">Upload</button></div>
         </div>
     </div>
 
-    <!-- Export to Campaign Modal -->
+    <!-- NEW: Export to Campaign Modal -->
     <div class="modal-overlay" id="export-modal">
         <div class="modal">
             <div class="modal-header"><h2>Export Selected Creators</h2><button class="modal-close" onclick="closeModal('export-modal')">×</button></div>
@@ -159,7 +452,7 @@
         </div>
     </div>
 
-    <!-- Add Creator Modal (Single) -->
+    <!-- UPDATED: Creator Database Modal -->
     <div class="modal-overlay" id="creator-modal">
         <div class="modal modal-large">
             <div class="modal-header"><h2>Add Creator</h2><button class="modal-close" onclick="closeModal('creator-modal')">×</button></div>
@@ -168,14 +461,14 @@
                     <div class="form-group"><label>Name</label><input type="text" id="c-name" required></div>
                     <div class="form-group"><label>Username</label><input type="text" id="c-username" required></div>
                     <div class="form-group"><label>Profile Link</label><input type="url" id="c-link" required></div>
-                    <div class="form-group"><label>Followers</label><input type="number" id="c-followers" required onchange="autoUpdateCategory(this.value)"></div>
+                    <div class="form-group"><label>Followers</label><input type="text" id="c-followers" required onchange="autoUpdateCategory(this.value)"></div>
                     <div class="form-group"><label>Niche</label><select id="c-niche" onchange="updateSubniches()"></select></div>
                     <div class="form-group"><label>Sub-Niche</label><select id="c-subniche"><option value="">Select Niche First</option></select></div>
                     <div class="form-group"><label>Category</label><input type="text" id="c-category" readonly style="background: var(--bg-tertiary);"></div>
                     <div class="form-group"><label>Gender</label><select id="c-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
                     <div class="form-group"><label>State</label><input type="text" id="c-state"></div>
                     <div class="form-group"><label>City</label><input type="text" id="c-city"></div>
-                    <div class="form-group"><label>Contact No</label><input type="text" id="c-contact"></div>
+                    <div class="form-group"><label>Contact</label><input type="text" id="c-contact"></div>
                     <div class="form-group"><label>Email</label><input type="email" id="c-email"></div>
                 </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary">Save Creator</button></div>
@@ -194,6 +487,7 @@
                     <div class="form-group"><label>Email</label><input type="email" id="b-email" required></div>
                     <div class="form-group"><label>Budget</label><select id="b-budget"><option>High</option><option>Medium</option><option>Low</option></select></div>
                     <div class="form-group"><label>Status</label><select id="b-status"><option>Hot Brands</option><option>Warm Brands</option><option>Converted to Campaign</option></select></div>
+                    <div class="form-group full-width"><label>Brief/Comments</label><textarea id="brief-comments"></textarea></div>
                 </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary">Save Brand</button></div>
             </form>
@@ -210,13 +504,78 @@
                     <div class="form-group"><label>Brand</label><select id="cp-brand" required></select></div>
                     <div class="form-group"><label>Platform</label><select id="cp-platform"><option>Instagram</option><option>YouTube</option><option>Both</option></select></div>
                     <div class="form-group"><label>Status</label><select id="cp-status"><option>Planning</option><option>Running</option></select></div>
+                    <div class="form-group"><label>Budget</label><input type="number" id="cp-budget"></div>
+                    <div class="form-group"><label>POC</label><select id="campaign-poc"></select></div>
                 </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary">Create Campaign</button></div>
             </form>
         </div>
     </div>
 
-    <div class="toast" id="toast"><i class="fas fa-check"></i><span id="toast-msg"></span></div>
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal">
+            <div class="modal-header"><h2>Add Task</h2><button class="modal-close" onclick="closeModal('task-modal')">×</button></div>
+            <form id="task-form">
+                <div class="form-grid">
+                    <div class="form-group full-width"><label>Task Title</label><input type="text" id="task-title" required></div>
+                    <div class="form-group"><label>Assign To</label><select id="task-assigned-to"></select></div>
+                    <div class="form-group"><label>Priority</label><select id="task-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
+                    <div class="form-group"><label>Due Date</label><input type="date" id="task-due-date"></div>
+                    <div class="form-group"><label>Status</label><select id="task-status"><option>To Do</option><option>In Progress</option></select></div>
+                </div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Save Task</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Creator to Campaign Modal -->
+    <div class="modal-overlay" id="creator-campaign-modal-overlay">
+        <div class="modal modal-large" id="creator-campaign-modal">
+            <div class="modal-header"><h2>Add Creator to Campaign</h2><button class="modal-close" onclick="closeModal('creator-campaign-modal-overlay')">×</button></div>
+            <form id="creator-campaign-form">
+                <div class="form-grid">
+                    <div class="form-group full-width"><label>Select Creator</label><select id="cc-select-creator"><option value="">-- Choose --</option></select></div>
+                    <input type="hidden" id="cc-campaign-id"><input type="hidden" id="cc-creator-id">
+                    <!-- Basic details auto-filled -->
+                    <div class="form-group"><label>Name</label><input type="text" id="cc-creator-name" readonly></div>
+                    <div class="form-group"><label>Commercial</label><input type="text" id="cc-creator-commercial"></div>
+                    <div class="form-group"><label>Status</label><select id="cc-content-status"><option>Pending</option><option>Live</option></select></div>
+                    <div class="form-group"><label>Drive Link</label><input type="url" id="cc-drive-link"></div>
+                    <div class="form-group"><label>Live Link</label><input type="url" id="cc-live-link"></div>
+                    <!-- Deliverables checkboxes would go here (simplified) -->
+                </div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Add to Campaign</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Member Modal -->
+    <div class="modal-overlay" id="member-modal">
+        <div class="modal">
+            <div class="modal-header"><h2>Team Member</h2><button class="modal-close" onclick="closeModal('member-modal')">×</button></div>
+            <form id="member-form">
+                <div class="form-grid">
+                    <div class="form-group"><label>Name</label><input type="text" id="member-name" required></div>
+                    <div class="form-group"><label>Email (username only)</label><div class="email-input-wrapper"><input type="text" id="member-email" required><span class="email-domain">@aflog.in</span></div></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="member-password"></div>
+                    <div class="form-group"><label>Role</label><select id="member-role-select"><option>Admin</option><option>Team Member</option></select></div>
+                    <div class="form-group"><label>Active</label><input type="checkbox" id="member-active" checked></div>
+                </div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Save Member</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirm-modal-overlay">
+        <div class="modal modal-small">
+            <div class="modal-header"><h2>Confirm</h2><button class="modal-close" onclick="closeModal('confirm-modal-overlay')">×</button></div>
+            <div class="confirm-content"><p id="confirm-message">Are you sure?</p><div class="form-actions"><button class="btn btn-danger" id="confirm-yes">Yes</button></div></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"><i class="fas fa-check"></i><span id="toast-message"></span></div>
     <script src="js/app.js"></script>
 </body>
 </html>
