@@ -7,352 +7,95 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .login-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #6366f1;
-            margin-bottom: 10px;
-        }
-
-        .login-logo i {
-            font-size: 2.5rem;
-        }
-
-        .login-subtitle {
-            color: #94a3b8;
-            font-size: 0.95rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-wrapper i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #64748b;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            color: #f8fafc;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .form-group input::placeholder {
-            color: #64748b;
-        }
-
-        .remember-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 25px;
-        }
-
-        .remember-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #94a3b8;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .remember-label input {
-            width: 16px;
-            height: 16px;
-            accent-color: #6366f1;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .error-message.show {
-            display: flex;
-        }
-
-        .footer-text {
-            text-align: center;
-            margin-top: 25px;
-            color: #64748b;
-            font-size: 0.8rem;
-        }
-
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: none;
-        }
-
-        .login-btn.loading .spinner {
-            display: block;
-        }
-
-        .login-btn.loading .btn-text {
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .domain-hint {
-            color: #64748b;
-            font-size: 0.75rem;
-            margin-top: 5px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-container { background: #1e293b; border: 1px solid #334155; border-radius: 20px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .login-header { text-align: center; margin-bottom: 35px; }
+        .login-logo { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 2rem; font-weight: 700; color: #6366f1; margin-bottom: 10px; }
+        .login-subtitle { color: #94a3b8; font-size: 0.95rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; color: #94a3b8; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .form-group input { width: 100%; padding: 14px 15px 14px 45px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #f8fafc; font-size: 1rem; transition: all 0.3s ease; }
+        .form-group input:focus { outline: none; border-color: #6366f1; }
+        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; border-radius: 10px; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3); }
+        .error-message { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 20px; display: none; align-items: center; gap: 10px; }
+        .error-message.show { display: flex; }
+        .footer-text { text-align: center; margin-top: 25px; color: #64748b; font-size: 0.8rem; }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="login-header">
-            <div class="login-logo">
-                <i class="fas fa-rocket"></i>
-                <span>Aflog CMS</span>
-            </div>
+            <div class="login-logo"><i class="fas fa-rocket"></i><span>Aflog CMS</span></div>
             <p class="login-subtitle">Campaign Management System</p>
         </div>
-
         <div class="error-message" id="error-message">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="error-text">Invalid username or password</span>
+            <i class="fas fa-exclamation-circle"></i><span id="error-text">Invalid credentials</span>
         </div>
-
         <form id="login-form">
             <div class="form-group">
                 <label for="email">Email</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="yourname@aflog.in" required>
-                </div>
-                <p class="domain-hint">Use your @aflog.in email</p>
+                <div class="input-wrapper"><i class="fas fa-envelope"></i><input type="email" id="email" placeholder="admin@aflog.in" required></div>
             </div>
-
             <div class="form-group">
                 <label for="password">Password</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Enter your password" required>
-                </div>
+                <div class="input-wrapper"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Password" required></div>
             </div>
-
-            <div class="remember-row">
-                <label class="remember-label">
-                    <input type="checkbox" id="remember">
-                    <span>Remember me</span>
-                </label>
-            </div>
-
-            <button type="submit" class="login-btn" id="login-btn">
-                <span class="btn-text">Sign In</span>
-                <div class="spinner"></div>
-            </button>
+            <button type="submit" class="login-btn" id="login-btn">Sign In</button>
         </form>
-
-        <p class="footer-text">
-            <i class="fas fa-shield-alt"></i> Secure access for Aflog team members only
-        </p>
+        <p class="footer-text">Secure access for Aflog team</p>
     </div>
 
     <script>
-        // =============================================
-        // DEFAULT ADMIN ACCOUNT
-        // Team members are managed from Admin Dashboard
-        // =============================================
-        const DEFAULT_ADMIN = {
-            email: 'admin@aflog.in',
-            password: 'admin@2024',
-            name: 'Admin',
-            role: 'admin'
-        };
+        // HARDCODED USERS TO FIX LOGIN ISSUE ACROSS DEVICES
+        const STATIC_USERS = [
+            { email: 'admin@aflog.in', password: 'admin@2024', name: 'Admin User', role: 'admin' },
+            { email: 'team@aflog.in', password: 'team@2024', name: 'Team Member', role: 'Team Member' }
+        ];
 
-        // Initialize team members in localStorage if not exists
-        function initializeUsers() {
-            let users = JSON.parse(localStorage.getItem('aflog_users'));
-            if (!users) {
-                users = [
-                    {
-                        id: 1,
-                        email: 'admin@aflog.in',
-                        password: 'admin@2024',
-                        name: 'Admin',
-                        role: 'admin',
-                        active: true
-                    }
-                ];
-                localStorage.setItem('aflog_users', JSON.stringify(users));
-            }
-            return users;
+        // Merge static users with local storage users
+        function getAllUsers() {
+            const localUsers = JSON.parse(localStorage.getItem('aflog_users')) || [];
+            // Combine arrays, avoiding duplicates based on email
+            const allUsers = [...STATIC_USERS];
+            localUsers.forEach(localUser => {
+                if (!allUsers.find(u => u.email === localUser.email)) {
+                    allUsers.push(localUser);
+                }
+            });
+            return allUsers;
         }
 
         const loginForm = document.getElementById('login-form');
-        const loginBtn = document.getElementById('login-btn');
         const errorMessage = document.getElementById('error-message');
         const errorText = document.getElementById('error-text');
 
         // Check if already logged in
-        if (localStorage.getItem('aflog_logged_in') === 'true' || 
-            sessionStorage.getItem('aflog_logged_in') === 'true') {
+        if (localStorage.getItem('aflog_logged_in') === 'true') {
             window.location.href = 'dashboard.html';
         }
 
-        // Initialize users
-        initializeUsers();
-
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
+            const users = getAllUsers();
+            
+            const validUser = users.find(u => u.email.toLowerCase() === email && u.password === password);
 
-            // Validate email domain
-            if (!email.endsWith('@aflog.in')) {
-                errorText.textContent = 'Please use your @aflog.in email';
+            if (validUser) {
+                localStorage.setItem('aflog_logged_in', 'true');
+                localStorage.setItem('aflog_user_email', validUser.email);
+                localStorage.setItem('aflog_user_name', validUser.name);
+                localStorage.setItem('aflog_user_role', validUser.role);
+                window.location.href = 'dashboard.html';
+            } else {
+                errorText.textContent = 'Invalid email or password';
                 errorMessage.classList.add('show');
-                return;
             }
-
-            // Show loading
-            loginBtn.classList.add('loading');
-            errorMessage.classList.remove('show');
-
-            // Simulate brief delay for UX
-            setTimeout(() => {
-                const users = JSON.parse(localStorage.getItem('aflog_users')) || [];
-                
-                const validUser = users.find(
-                    user => user.email.toLowerCase() === email && 
-                           user.password === password &&
-                           user.active !== false
-                );
-
-                if (validUser) {
-                    // Store login state
-                    const storage = remember ? localStorage : sessionStorage;
-                    storage.setItem('aflog_logged_in', 'true');
-                    storage.setItem('aflog_user_email', validUser.email);
-                    storage.setItem('aflog_user_name', validUser.name);
-                    storage.setItem('aflog_user_role', validUser.role);
-                    storage.setItem('aflog_user_id', validUser.id);
-                    
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard.html';
-                } else {
-                    // Check if user exists but wrong password
-                    const userExists = users.find(u => u.email.toLowerCase() === email);
-                    if (userExists && userExists.active === false) {
-                        errorText.textContent = 'Your account has been deactivated. Contact admin.';
-                    } else if (userExists) {
-                        errorText.textContent = 'Incorrect password';
-                    } else {
-                        errorText.textContent = 'Account not found. Contact admin for access.';
-                    }
-                    errorMessage.classList.add('show');
-                    loginBtn.classList.remove('loading');
-                }
-            }, 800);
         });
     </script>
 </body>
