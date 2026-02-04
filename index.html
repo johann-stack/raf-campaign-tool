@@ -3,221 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand OS - Home</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="dashboard.css">
-    <script src="app.js" defer></script>
+    <title>Aflog CMS - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 10px;
+        }
+
+        .login-logo i {
+            font-size: 2.5rem;
+        }
+
+        .login-subtitle {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f8fafc;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: #64748b;
+        }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .remember-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .remember-label input {
+            width: 16px;
+            height: 16px;
+            accent-color: #6366f1;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 25px;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        .login-btn.loading .spinner {
+            display: block;
+        }
+
+        .login-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .domain-hint {
+            color: #64748b;
+            font-size: 0.75rem;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>Brand OS</h2>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-rocket"></i>
+                <span>Aflog CMS</span>
+            </div>
+            <p class="login-subtitle">Campaign Management System</p>
         </div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li><a href="dashboard.html"><i class="icon-dashboard"></i> Dashboard</a></li>
-                <li><a href="creators.html"><i class="icon-creators"></i> Creator Database</a></li>
-                <li><a href="campaigns.html"><i class="icon-campaign"></i> Campaigns</a></li>
-                <li><a href="tasks.html"><i class="icon-tasks"></i> Tasks</a></li>
-                <li><a href="analytics.html"><i class="icon-analytics"></i> Analytics</a></li>
-                <li><a href="settings.html"><i class="icon-settings"></i> Settings</a></li>
-            </ul>
-        </nav>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <header class="top-bar">
-            <div class="search-container">
-                <input type="text" placeholder="Search creators, campaigns, brands...">
-                <i class="icon-search"></i>
+        <div class="error-message" id="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="error-text">Invalid username or password</span>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="yourname@aflog.in" required>
+                </div>
+                <p class="domain-hint">Use your @aflog.in email</p>
             </div>
-            <div class="top-bar-actions">
-                <button class="btn primary">Add New</button>
-                <div class="user-profile">
-                    <img src="assets/avatar.png" alt="User Avatar">
-                    <span>Admin</span>
-                </div>
-            </div>
-        </header>
 
-        <section class="view">
-            <div class="view-header">
-                <h1>Welcome, Admin</h1>
-                <p>Manage all brands, creators, campaigns, and analytics from here.</p>
-            </div>
-            <!-- Dashboard Quick Cards -->
-            <div class="dashboard-cards-grid">
-                <!-- Warm Brands -->
-                <div class="dashboard-card warm-brands">
-                    <h3>Warm Brands</h3>
-                    <p>Total: <span id="warm-brands-count">0</span></p>
-                    <a href="brands.html?filter=warm" class="btn small">View All</a>
-                </div>
-
-                <!-- Hot Brands -->
-                <div class="dashboard-card hot-brands">
-                    <h3>Hot Brands</h3>
-                    <p>Total: <span id="hot-brands-count">0</span></p>
-                    <a href="brands.html?filter=hot" class="btn small">View All</a>
-                </div>
-
-                <!-- Running Campaigns -->
-                <div class="dashboard-card running-campaigns">
-                    <h3>Running Campaigns</h3>
-                    <p>Total: <span id="running-campaigns-count">0</span></p>
-                    <a href="campaigns.html?status=running" class="btn small">View All</a>
-                </div>
-
-                <!-- Live Campaigns -->
-                <div class="dashboard-card live-campaigns">
-                    <h3>Live Campaigns</h3>
-                    <p>Total: <span id="live-campaigns-count">0</span></p>
-                    <a href="campaigns.html?status=live" class="btn small">View All</a>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Enter your password" required>
                 </div>
             </div>
 
-            <!-- Creator Database Summary -->
-            <div class="summary-section">
-                <h2>Creator Database Overview</h2>
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <h4>Total Creators</h4>
-                        <span id="total-creators">0</span>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Nano</h4>
-                        <span id="nano-creators">0</span>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Micro</h4>
-                        <span id="micro-creators">0</span>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Macro</h4>
-                        <span id="macro-creators">0</span>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Mega</h4>
-                        <span id="mega-creators">0</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Campaign Summary Section -->
-            <div class="campaign-summary-section">
-                <h2>Campaign Overview</h2>
-                <div class="campaign-summary-grid">
-                    <div class="campaign-card running">
-                        <h4>Running Campaigns</h4>
-                        <span id="running-campaigns-count-summary">0</span>
-                    </div>
-                    <div class="campaign-card completed">
-                        <h4>Completed Campaigns</h4>
-                        <span id="completed-campaigns-count">0</span>
-                    </div>
-                    <div class="campaign-card upcoming">
-                        <h4>Upcoming Campaigns</h4>
-                        <span id="upcoming-campaigns-count">0</span>
-                    </div>
-                    <div class="campaign-card paused">
-                        <h4>Paused Campaigns</h4>
-                        <span id="paused-campaigns-count">0</span>
-                    </div>
-                </div>
+            <div class="remember-row">
+                <label class="remember-label">
+                    <input type="checkbox" id="remember">
+                    <span>Remember me</span>
+                </label>
             </div>
 
-            <!-- Analytics Snapshot -->
-            <div class="analytics-snapshot">
-                <h2>Analytics Snapshot</h2>
-                <div class="analytics-grid">
-                    <div class="analytics-card">
-                        <h4>Total Reach</h4>
-                        <span id="total-reach">0</span>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Total Engagement</h4>
-                        <span id="total-engagement">0</span>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Avg. Campaign ROI</h4>
-                        <span id="avg-campaign-roi">0%</span>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Top Performing Campaign</h4>
-                        <span id="top-campaign">N/A</span>
-                    </div>
-                </div>
-            </div>
+            <button type="submit" class="login-btn" id="login-btn">
+                <span class="btn-text">Sign In</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
 
-            <!-- Quick Links -->
-            <div class="quick-links">
-                <h2>Quick Actions</h2>
-                <div class="quick-links-grid">
-                    <a href="add-creator.html" class="btn primary">Add New Creator</a>
-                    <a href="add-campaign.html" class="btn primary">Add New Campaign</a>
-                    <a href="creator-database.html" class="btn secondary">Open Creator Database</a>
-                    <a href="all-campaigns.html" class="btn secondary">View All Campaigns</a>
-                </div>
-            </div>
-            <!-- Footer -->
-            <footer class="dashboard-footer">
-                <p>&copy; 2026 YourCompany. All rights reserved.</p>
-            </footer>
+        <p class="footer-text">
+            <i class="fas fa-shield-alt"></i> Secure access for Aflog team members only
+        </p>
+    </div>
 
-            <!-- Modals -->
-            <!-- Example: Confirm Delete Modal -->
-            <div class="modal-overlay" id="confirm-delete-modal">
-                <div class="modal modal-small">
-                    <div class="modal-header">
-                        <h2>Confirm Delete</h2>
-                        <button class="modal-close" onclick="closeModal('confirm-delete-modal')">&times;</button>
-                    </div>
-                    <div class="confirm-content">
-                        <p>Are you sure you want to delete this item? This action cannot be undone.</p>
-                        <div class="form-actions">
-                            <button class="btn secondary" onclick="closeModal('confirm-delete-modal')">Cancel</button>
-                            <button class="btn danger" onclick="performDelete()">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Toast Notification -->
-            <div class="toast" id="toast-notification">
-                <i class="fas fa-check-circle"></i>
-                <span id="toast-message">Action completed successfully!</span>
-            </div>
-
-        </main>
-    </div> <!-- end of main-content -->
-
-    <!-- Scripts -->
-    <script src="app.js"></script>
     <script>
-        // Initialize dashboard counters and analytics
-        document.addEventListener("DOMContentLoaded", function() {
-            updateCampaignSummary();
-            updateAnalyticsSnapshot();
+        // =============================================
+        // DEFAULT ADMIN ACCOUNT
+        // Team members are managed from Admin Dashboard
+        // =============================================
+        const DEFAULT_ADMIN = {
+            email: 'admin@aflog.in',
+            password: 'admin@2024',
+            name: 'Admin',
+            role: 'admin'
+        };
+
+        // Initialize team members in localStorage if not exists
+        function initializeUsers() {
+            let users = JSON.parse(localStorage.getItem('aflog_users'));
+            if (!users) {
+                users = [
+                    {
+                        id: 1,
+                        email: 'admin@aflog.in',
+                        password: 'admin@2024',
+                        name: 'Admin',
+                        role: 'admin',
+                        active: true
+                    }
+                ];
+                localStorage.setItem('aflog_users', JSON.stringify(users));
+            }
+            return users;
+        }
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+
+        // Check if already logged in
+        if (localStorage.getItem('aflog_logged_in') === 'true' || 
+            sessionStorage.getItem('aflog_logged_in') === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Initialize users
+        initializeUsers();
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // Validate email domain
+            if (!email.endsWith('@aflog.in')) {
+                errorText.textContent = 'Please use your @aflog.in email';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            // Show loading
+            loginBtn.classList.add('loading');
+            errorMessage.classList.remove('show');
+
+            // Simulate brief delay for UX
+            setTimeout(() => {
+                const users = JSON.parse(localStorage.getItem('aflog_users')) || [];
+                
+                const validUser = users.find(
+                    user => user.email.toLowerCase() === email && 
+                           user.password === password &&
+                           user.active !== false
+                );
+
+                if (validUser) {
+                    // Store login state
+                    const storage = remember ? localStorage : sessionStorage;
+                    storage.setItem('aflog_logged_in', 'true');
+                    storage.setItem('aflog_user_email', validUser.email);
+                    storage.setItem('aflog_user_name', validUser.name);
+                    storage.setItem('aflog_user_role', validUser.role);
+                    storage.setItem('aflog_user_id', validUser.id);
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Check if user exists but wrong password
+                    const userExists = users.find(u => u.email.toLowerCase() === email);
+                    if (userExists && userExists.active === false) {
+                        errorText.textContent = 'Your account has been deactivated. Contact admin.';
+                    } else if (userExists) {
+                        errorText.textContent = 'Incorrect password';
+                    } else {
+                        errorText.textContent = 'Account not found. Contact admin for access.';
+                    }
+                    errorMessage.classList.add('show');
+                    loginBtn.classList.remove('loading');
+                }
+            }, 800);
         });
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function performDelete() {
-            // Your delete logic here
-            showToast("Item deleted successfully!");
-            closeModal('confirm-delete-modal');
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            toast.className = 'toast ' + (type === 'error' ? 'error' : '');
-            document.getElementById('toast-message').innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
     </script>
 </body>
 </html>
