@@ -30,19 +30,24 @@
                         <i class="fas fa-th-large"></i>
                         <span>Dashboard</span>
                     </div>
-                    <div class="nav-item" data-section="brands">
-                        <i class="fas fa-building"></i>
-                        <span>Brands</span>
+                    <div class="nav-item" data-section="my-tasks">
+                        <i class="fas fa-tasks"></i>
+                        <span>My Tasks</span>
+                        <span class="badge" id="myTasksCount">0</span>
                     </div>
-                    <div class="nav-item" data-section="all-campaigns">
-                        <i class="fas fa-rocket"></i>
-                        <span>All Campaigns</span>
+                    <div class="nav-item" data-section="team-members">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Team Members</span>
                     </div>
                 </div>
 
-                <!-- Pipeline Section -->
+                <!-- Brands Section -->
                 <div class="nav-section">
-                    <div class="nav-section-title">Pipeline</div>
+                    <div class="nav-section-title">Brands</div>
+                    <div class="nav-item" data-section="brands">
+                        <i class="fas fa-building"></i>
+                        <span>All Brands</span>
+                    </div>
                     <div class="nav-item" data-section="hot-brands">
                         <i class="fas fa-fire"></i>
                         <span>Hot Brands</span>
@@ -62,6 +67,10 @@
                 <!-- Campaigns Section -->
                 <div class="nav-section">
                     <div class="nav-section-title">Campaigns</div>
+                    <div class="nav-item" data-section="all-campaigns">
+                        <i class="fas fa-rocket"></i>
+                        <span>All Campaigns</span>
+                    </div>
                     <div class="nav-item" data-section="converted-campaigns">
                         <i class="fas fa-check-circle"></i>
                         <span>Converted to Campaign</span>
@@ -84,7 +93,7 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Database</div>
                     <div class="nav-item" data-section="creator-database">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-user-circle"></i>
                         <span>Creator Database</span>
                     </div>
                 </div>
@@ -103,7 +112,7 @@
                 </div>
 
                 <!-- Logout -->
-                <div class="nav-section" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--gray-700);">
+                <div class="nav-section" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
                     <div class="nav-item" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Logout</span>
@@ -135,8 +144,9 @@
                 </div>
             </header>
 
-            <!-- Dashboard Section -->
+            <!-- ========== DASHBOARD SECTION ========== -->
             <section class="content-section active" id="section-dashboard">
+                <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon primary">
@@ -170,48 +180,86 @@
                             <i class="fas fa-heart-crack"></i>
                         </div>
                         <div class="stat-details">
-                            <h3 id="lostBrands">0</h3>
+                            <h3 id="lostBrandsCount">0</h3>
                             <p>Lost Brands</p>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon info">
-                            <i class="fas fa-users"></i>
+                            <i class="fas fa-user-circle"></i>
                         </div>
                         <div class="stat-details">
                             <h3 id="totalCreators">0</h3>
                             <p>Total Creators</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon success">
-                            <i class="fas fa-redo"></i>
+                    <!-- Conversion Rate Card -->
+                    <div class="stat-card conversion-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
                         </div>
                         <div class="stat-details">
-                            <h3 id="retainerBrands">0</h3>
-                            <p>Retainer Brands</p>
+                            <h3 class="conversion-percentage" id="conversionRate">0%</h3>
+                            <p>Conversion Rate</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
+                <!-- Dashboard Grid: My Tasks + Recent Activity -->
+                <div class="dashboard-grid">
+                    <!-- My Tasks Preview -->
+                    <div class="tasks-section">
+                        <div class="table-header">
+                            <h2><i class="fas fa-tasks" style="color: var(--primary-color); margin-right: 8px;"></i> My Tasks</h2>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('addTaskModal')">
+                                <i class="fas fa-plus"></i> Add Task
+                            </button>
+                        </div>
+                        <div id="dashboardTasksList">
+                            <div class="empty-state" style="padding: 40px;">
+                                <i class="fas fa-clipboard-check"></i>
+                                <h3>No tasks yet</h3>
+                                <p>Add a task to get started</p>
+                            </div>
+                        </div>
+                        <div style="padding: 16px; border-top: 1px solid var(--border-color); text-align: center;">
+                            <a href="#" onclick="navigateTo('my-tasks')" style="color: var(--primary-color); font-size: 14px;">View All Tasks →</a>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-section">
+                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+                        <div class="activity-list" id="recentActivityList">
+                            <div class="empty-state" style="padding: 20px;">
+                                <p style="color: var(--text-muted);">No recent activity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Brands Table -->
                 <div class="table-container">
                     <div class="table-header">
-                        <h2>Recent Activity</h2>
+                        <h2>Recent Brands</h2>
+                        <button class="btn btn-primary" onclick="openModal('addBrandModal')">
+                            <i class="fas fa-plus"></i> Add Brand
+                        </button>
                     </div>
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Brand</th>
                                 <th>Status</th>
-                                <th>Campaign</th>
-                                <th>Updated</th>
+                                <th>POC</th>
+                                <th>Budget</th>
+                                <th>Added</th>
                             </tr>
                         </thead>
-                        <tbody id="recentActivityTable">
+                        <tbody id="recentBrandsTable">
                             <tr>
-                                <td colspan="4" class="empty-state">
-                                    <p>No recent activity</p>
+                                <td colspan="5" class="empty-state">
+                                    <p>No brands added yet</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -219,7 +267,47 @@
                 </div>
             </section>
 
-            <!-- Brands Section -->
+            <!-- ========== MY TASKS SECTION ========== -->
+            <section class="content-section" id="section-my-tasks">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="fas fa-tasks" style="color: var(--primary-color); margin-right: 8px;"></i> My Tasks</h2>
+                        <div class="table-actions">
+                            <select id="taskFilterStatus" onchange="filterTasks()">
+                                <option value="all">All Tasks</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <button class="btn btn-primary" onclick="openModal('addTaskModal')">
+                                <i class="fas fa-plus"></i> Add Task
+                            </button>
+                        </div>
+                    </div>
+                    <div id="allTasksList">
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-check"></i>
+                            <h3>No tasks yet</h3>
+                            <p>Create your first task to get started</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== TEAM MEMBERS SECTION ========== -->
+            <section class="content-section" id="section-team-members">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="fas fa-users-cog" style="color: var(--primary-color); margin-right: 8px;"></i> Team Members</h2>
+                    </div>
+                    <div class="team-grid" id="teamMembersGrid">
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h3>Loading team members...</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+                        <!-- ========== BRANDS SECTION ========== -->
             <section class="content-section" id="section-brands">
                 <div class="table-container">
                     <div class="table-header">
@@ -253,11 +341,11 @@
                 </div>
             </section>
 
-            <!-- Hot Brands Section -->
+            <!-- ========== HOT BRANDS SECTION ========== -->
             <section class="content-section" id="section-hot-brands">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-fire" style="color: var(--danger-color);"></i> Hot Brands</h2>
+                        <h2><i class="fas fa-fire" style="color: var(--danger-color); margin-right: 8px;"></i> Hot Brands</h2>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="openModal('addHotBrandModal')">
                                 <i class="fas fa-plus"></i> Add Hot Brand
@@ -289,11 +377,11 @@
                 </div>
             </section>
 
-            <!-- Warm Brands Section -->
+            <!-- ========== WARM BRANDS SECTION ========== -->
             <section class="content-section" id="section-warm-brands">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-temperature-half" style="color: var(--warning-color);"></i> Warm Brands</h2>
+                        <h2><i class="fas fa-temperature-half" style="color: var(--warning-color); margin-right: 8px;"></i> Warm Brands</h2>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="openModal('addWarmBrandModal')">
                                 <i class="fas fa-plus"></i> Add Warm Brand
@@ -325,11 +413,11 @@
                 </div>
             </section>
 
-            <!-- Lost Brands Section -->
+            <!-- ========== LOST BRANDS SECTION ========== -->
             <section class="content-section" id="section-lost-brands">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-heart-crack" style="color: var(--gray-500);"></i> Lost Brands</h2>
+                        <h2><i class="fas fa-heart-crack" style="color: var(--text-muted); margin-right: 8px;"></i> Lost Brands</h2>
                     </div>
                     <table class="data-table">
                         <thead>
@@ -352,11 +440,40 @@
                     </table>
                 </div>
             </section>
-                        <!-- Converted to Campaign Section -->
+
+            <!-- ========== ALL CAMPAIGNS SECTION ========== -->
+            <section class="content-section" id="section-all-campaigns">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2><i class="fas fa-rocket" style="color: var(--primary-color); margin-right: 8px;"></i> All Campaigns</h2>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Campaign Name</th>
+                                <th>Brand Name</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>Retainer</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allCampaignsTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    <p>No campaigns yet</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ========== CONVERTED TO CAMPAIGN SECTION ========== -->
             <section class="content-section" id="section-converted-campaigns">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Converted to Campaign</h2>
+                        <h2><i class="fas fa-check-circle" style="color: var(--success-color); margin-right: 8px;"></i> Converted to Campaign</h2>
                         <div class="table-actions">
                             <button class="btn btn-success" onclick="openModal('addCreatorsToCampaignModal')">
                                 <i class="fas fa-user-plus"></i> Add Creators
@@ -390,11 +507,11 @@
                 </div>
             </section>
 
-            <!-- Campaign Running Section -->
+            <!-- ========== CAMPAIGN RUNNING SECTION ========== -->
             <section class="content-section" id="section-running-campaigns">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-play-circle" style="color: var(--primary-color);"></i> Campaign Running</h2>
+                        <h2><i class="fas fa-play-circle" style="color: var(--primary-color); margin-right: 8px;"></i> Campaign Running</h2>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="openModal('addRunningCampaignModal')">
                                 <i class="fas fa-plus"></i> Add Running Campaign
@@ -424,11 +541,11 @@
                 </div>
             </section>
 
-            <!-- Campaign Live Section -->
+            <!-- ========== CAMPAIGN LIVE SECTION ========== -->
             <section class="content-section" id="section-live-campaigns">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-broadcast-tower" style="color: var(--success-color);"></i> Campaign Live</h2>
+                        <h2><i class="fas fa-broadcast-tower" style="color: var(--success-color); margin-right: 8px;"></i> Campaign Live</h2>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="openModal('addLiveCampaignModal')">
                                 <i class="fas fa-plus"></i> Add Live Campaign
@@ -445,11 +562,11 @@
                 </div>
             </section>
 
-            <!-- Invoice Stage Section -->
+            <!-- ========== INVOICE STAGE SECTION ========== -->
             <section class="content-section" id="section-invoice-stage">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-file-invoice-dollar" style="color: var(--warning-color);"></i> Invoice Stage</h2>
+                        <h2><i class="fas fa-file-invoice-dollar" style="color: var(--warning-color); margin-right: 8px;"></i> Invoice Stage</h2>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="openModal('addInvoiceModal')">
                                 <i class="fas fa-plus"></i> Add Invoice
@@ -478,36 +595,7 @@
                     </table>
                 </div>
             </section>
-
-            <!-- All Campaigns Section -->
-            <section class="content-section" id="section-all-campaigns">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h2><i class="fas fa-rocket" style="color: var(--primary-color);"></i> All Campaigns</h2>
-                    </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Campaign Name</th>
-                                <th>Brand Name</th>
-                                <th>Status</th>
-                                <th>Start Date</th>
-                                <th>Retainer</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allCampaignsTableBody">
-                            <tr>
-                                <td colspan="6" class="empty-state">
-                                    <p>No campaigns yet</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Creator Database Section -->
+                        <!-- ========== CREATOR DATABASE SECTION ========== -->
             <section class="content-section" id="section-creator-database">
                 <!-- Restricted Access Overlay (for non-authorized users) -->
                 <div class="restricted-overlay" id="creatorRestrictedOverlay" style="display: none;">
@@ -535,7 +623,7 @@
 
                 <div class="table-container">
                     <div class="table-header">
-                        <h2><i class="fas fa-users" style="color: var(--info-color);"></i> Creator Database</h2>
+                        <h2><i class="fas fa-user-circle" style="color: var(--info-color); margin-right: 8px;"></i> Creator Database</h2>
                         <div class="table-actions">
                             <button class="btn btn-secondary" onclick="openModal('csvUploadModal')">
                                 <i class="fas fa-file-csv"></i> Bulk CSV Upload
@@ -548,8 +636,8 @@
                     
                     <!-- Filters -->
                     <div class="creator-filters">
-                        <input type="text" id="creatorSearchInput" placeholder="Search by name, username...">
-                        <select id="filterNiche">
+                        <input type="text" id="creatorSearchInput" placeholder="Search by name, username..." onkeyup="filterCreators()">
+                        <select id="filterNiche" onchange="filterCreators()">
                             <option value="">All Niches</option>
                             <option value="Fashion">Fashion</option>
                             <option value="Beauty & Skincare">Beauty & Skincare</option>
@@ -564,20 +652,20 @@
                             <option value="Performing Arts">Performing Arts</option>
                             <option value="Automobile">Automobile</option>
                         </select>
-                        <select id="filterCategory">
+                        <select id="filterCategory" onchange="filterCreators()">
                             <option value="">All Categories</option>
                             <option value="Nano">Nano (&lt;15K)</option>
                             <option value="Micro">Micro (&lt;150K)</option>
                             <option value="Macro">Macro (&lt;550K)</option>
                             <option value="Mega">Mega (550K+)</option>
                         </select>
-                        <select id="filterGender">
+                        <select id="filterGender" onchange="filterCreators()">
                             <option value="">All Genders</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
                         </select>
-                        <select id="filterState">
+                        <select id="filterState" onchange="filterCreators()">
                             <option value="">All States</option>
                         </select>
                         <button class="btn btn-secondary btn-sm" onclick="resetCreatorFilters()">
@@ -614,7 +702,7 @@
                 </div>
             </section>
 
-            <!-- User Management Section (Admin Only) -->
+            <!-- ========== USER MANAGEMENT SECTION (Admin Only) ========== -->
             <section class="content-section" id="section-user-management">
                 <div class="admin-section">
                     <h3><i class="fas fa-user-shield"></i> User Management</h3>
@@ -629,7 +717,6 @@
                         <h2>Team Members</h2>
                     </div>
                     <div id="userManagementList">
-                        <!-- Users will be populated here -->
                         <div class="empty-state">
                             <i class="fas fa-users"></i>
                             <h3>Loading users...</h3>
@@ -638,7 +725,7 @@
                 </div>
             </section>
 
-            <!-- Access Control Section (Admin Only) -->
+            <!-- ========== ACCESS CONTROL SECTION (Admin Only) ========== -->
             <section class="content-section" id="section-access-control">
                 <div class="admin-section">
                     <h3><i class="fas fa-shield-alt"></i> Access Control</h3>
@@ -650,7 +737,6 @@
                         <h2>Creator Database Access</h2>
                     </div>
                     <div class="access-control-list" id="accessControlList">
-                        <!-- Access controls will be populated here -->
                         <div class="empty-state">
                             <i class="fas fa-lock"></i>
                             <h3>Loading access controls...</h3>
@@ -661,7 +747,8 @@
 
         </main>
     </div>
-        <!-- ===== MODALS ===== -->
+
+    <!-- ========== MODALS ========== -->
 
     <!-- Add Brand Modal -->
     <div class="modal-overlay" id="addBrandModal">
@@ -725,6 +812,71 @@
                 <button class="btn btn-secondary" onclick="closeModal('addBrandModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="saveBrand()">
                     <i class="fas fa-save"></i> Save Brand
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal-overlay" id="addTaskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add New Task</h2>
+                <button class="modal-close" onclick="closeModal('addTaskModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addTaskForm">
+                    <div class="form-group">
+                        <label>Task Title <span class="required">*</span></label>
+                        <input type="text" name="taskTitle" required placeholder="Enter task title">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Link to Brand</label>
+                            <select name="linkedBrand" id="taskLinkedBrand">
+                                <option value="">Select Brand (Optional)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Link to Campaign</label>
+                            <select name="linkedCampaign" id="taskLinkedCampaign">
+                                <option value="">Select Campaign (Optional)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Priority <span class="required">*</span></label>
+                            <select name="priority" required>
+                                <option value="">Select Priority</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Due Date</label>
+                            <input type="date" name="dueDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign To <span class="required">*</span></label>
+                        <select name="assignTo" id="taskAssignTo" required>
+                            <option value="">Select Team Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" placeholder="Task description..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addTaskModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTask()">
+                    <i class="fas fa-save"></i> Save Task
                 </button>
             </div>
         </div>
@@ -897,8 +1049,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Add Converted Campaign Modal -->
+        <!-- Add Converted Campaign Modal -->
     <div class="modal-overlay" id="addConvertedCampaignModal">
         <div class="modal">
             <div class="modal-header">
@@ -1169,7 +1320,7 @@
                         </div>
                         <div class="form-group">
                             <label>Followers <span class="required">*</span></label>
-                            <input type="number" name="followers" required placeholder="Enter follower count" onchange="autoCalculateCategory()">
+                            <input type="number" name="followers" id="creatorFollowers" required placeholder="Enter follower count" onkeyup="autoCalculateCategory()">
                         </div>
                     </div>
                     <div class="form-row">
@@ -1276,7 +1427,7 @@
                 </div>
                 <div class="form-group">
                     <label>CSV Format Required:</label>
-                    <p style="font-size: 12px; color: var(--gray-500); margin-top: 8px;">
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
                         Name, Link, Username, Followers, Niche, Subniche, Category, State, City, Contact No, Email, Gender
                     </p>
                     <button class="btn btn-outline btn-sm" style="margin-top: 10px;" onclick="downloadCSVTemplate()">
@@ -1284,8 +1435,8 @@
                     </button>
                 </div>
                 <div id="csvPreview" style="display: none; margin-top: 20px;">
-                    <h4>Preview (<span id="csvRowCount">0</span> rows)</h4>
-                    <div style="max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--gray-200); border-radius: 8px;">
+                    <h4 style="color: var(--text-primary);">Preview (<span id="csvRowCount">0</span> rows)</h4>
+                    <div style="max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
                         <table class="data-table" id="csvPreviewTable">
                             <thead>
                                 <tr>
@@ -1365,7 +1516,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p style="margin-bottom: 16px;">Select a campaign to export <strong id="exportCreatorCount">0</strong> bookmarked creators:</p>
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">Select a campaign to export <strong id="exportCreatorCount" style="color: var(--primary-color);">0</strong> bookmarked creators:</p>
                 <div class="export-options" id="exportCampaignOptions">
                     <!-- Campaign options will be populated here -->
                 </div>
@@ -1399,7 +1550,7 @@
                     <label>Search & Select Creators</label>
                     <input type="text" id="searchCreatorsForCampaign" placeholder="Search creators...">
                 </div>
-                <div style="max-height: 300px; overflow-y: auto; margin-top: 16px; border: 1px solid var(--gray-200); border-radius: 8px;">
+                <div style="max-height: 300px; overflow-y: auto; margin-top: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -1429,9 +1580,30 @@
         </div>
     </div>
 
+    <!-- View Team Member Tasks Modal -->
+    <div class="modal-overlay" id="viewMemberTasksModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><span id="memberNameTitle">Team Member</span>'s Tasks</h2>
+                <button class="modal-close" onclick="closeModal('viewMemberTasksModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="memberTasksList">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-check"></i>
+                        <h3>No tasks assigned</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('viewMemberTasksModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Include the app.js file -->
     <script src="js/app.js"></script>
 </body>
 </html>
-
-
