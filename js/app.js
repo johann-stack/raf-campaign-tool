@@ -807,142 +807,454 @@ function viewMemberTasks(userId, userName) {
     
     openModal('viewMemberTasksModal');
 }
-// ===== Brands Table =====
+// ===== Brands Grid =====
+const categoryIcons = {
+    'Food': 'fa-utensils',
+    'Fashion': 'fa-tshirt',
+    'FMCG': 'fa-box',
+    'Tech': 'fa-microchip',
+    'Fitness': 'fa-dumbbell',
+    'Sports': 'fa-football',
+    'Beauty': 'fa-spa',
+    'Lifestyle': 'fa-heart',
+    'Automobile': 'fa-car',
+    'Others': 'fa-briefcase'
+};
+
+let currentViewingBrandIndex = null;
+
 function refreshBrandsTable() {
-    const tbody = document.getElementById('brandsTableBody');
+    refreshBrandsGrid();
+}
+
+function refreshBrandsGrid() {
+    const container = document.getElementById('brandsGridContainer');
+    
+    if (!container) return;
     
     if (appData.brands.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="empty-state">
-                    <p>No brands added yet</p>
-                </td>
-            </tr>
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-building"></i>
+                <h3>No brands added yet</h3>
+                <p>Add your first brand to get started</p>
+            </div>
         `;
         return;
     }
     
-    tbody.innerHTML = appData.brands.map((brand, index) => `
-        <tr>
-            <td><strong>${brand.brandName}</strong></td>
-            <td>${brand.pocName}</td>
-            <td>${brand.pocEmail}</td>
-            <td>${brand.pocNumber}</td>
-            <td><span class="status-badge ${getBudgetClass(brand.budgetStatus)}">${brand.budgetStatus}</span></td>
-            <td>
-                <select class="status-dropdown" onchange="updateBrandStatus(${index}, this.value)">
-                    <option value="Hot Brands" ${brand.status === 'Hot Brands' ? 'selected' : ''}>Hot Brands</option>
-                    <option value="Warm Brands" ${brand.status === 'Warm Brands' ? 'selected' : ''}>Warm Brands</option>
-                    <option value="Lost Brands" ${brand.status === 'Lost Brands' ? 'selected' : ''}>Lost Brands</option>
-                    <option value="Converted to Campaign" ${brand.status === 'Converted to Campaign' ? 'selected' : ''}>Converted to Campaign</option>
-                </select>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-secondary" onclick="editBrand(${index})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteBrand(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    // Group brands by category
+    const groupedBrands = {};
+    
+    appData.brands.forEach((brand, index) => {
+        const category = brand.brandCategory || 'Others';
+        if (!groupedBrands[category]) {
+            groupedBrands[category] = [];
+        }
+        groupedBrands[category].push({ ...brand, index });
+    });
+    
+    // Check filter
+    const filterCategory = document.getElementById('brandCategoryFilter')?.value || '';
+    
+    let html = '';
+    
+    // Sort categories alphabetically
+    const sortedCategories = Object.keys(groupedBrands).sort();
+    
+    sortedCategories.forEach(category => {
+        // Skip if filter is applied and doesn't match
+        if (filterCategory && filterCategory !== category) return;
+        
+        const brands = groupedBrands[category];
+        const icon = categoryIcons[category] || 'fa-briefcase';
+        
+        html += `
+            <div class="brand-category-section">
+                <div class="brand-category-header">
+                    <i class="fas ${icon} category-icon ${category.toLowerCase().replace(/\s+/g, '')}"></i>
+                    <h3>${category}</h3>
+                    <span class="count">${brands.length} brand${brands.length > 1 ? 's' : ''}</span>
+                </div>
+                <div class="brand-cards-grid">
+                    ${brands.map(brand => createBrandCard(brand)).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    if (!html) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-filter"></i>
+                <h3>No brands in this category</h3>
+                <p>Try selecting a different category</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = html;
 }
 
-// ===== Update Brand Status (Auto-shift) =====
-async function updateBrandStatus(index, newStatus) {
+function createBrandCard(brand) {
+    const icon = categoryIcons[brand.brandCategory] || 'fa-briefcase';
+    const canDelete = currentUser.role === 'admin' || appData.accessControl[currentUser.id + '_delete'] === true;
+    const canUploadImage = currentUser.role === 'admin' || appData.accessControl[currentUser.id + '_upload'] === true;
+    
+    return `
+        <div class="brand-card" onclick="viewBrand(${brand.index})">
+            <div class="brand-card-cover">
+                ${brand.coverImage 
+                    ? `<img src="${brand.coverImage}" alt="${brand.brandName}">`
+                    : `<i class="fas ${icon} placeholder-icon"></i>`
+                }
+                ${canUploadImage ? `
+                    <div class="upload-overlay" onclick="event.stopPropagation(); triggerImageUpload(${brand.index})">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="brand-card-body">
+                <h4>${brand.brandName}</h4>
+                <div class="brand-card-meta">
+                    <span class="brand-card-category">
+                        <i class="fas ${icon}"></i> ${brand.brandCategory || 'Others'}
+                    </span>
+                    <span class="status-badge ${getBudgetClass(brand.budgetStatus)}">${brand.budgetStatus}</span>
+                </div>
+                <span class="status-badge ${getStatusClass(brand.status)}">${brand.status}</span>
+            </div>
+            <div class="brand-card-footer" onclick="event.stopPropagation()">
+                <span class="status-badge info" style="font-size: 11px;">
+                    <i class="fas fa-user"></i> ${brand.rafPoc || 'No RAF POC'}
+                </span>
+                <div class="brand-card-actions">
+                    <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openEditBrandModalDirect(${brand.index})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    ${canDelete ? `
+                        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteBrand(${brand.index})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function filterBrandsByCategory() {
+    refreshBrandsGrid();
+}
+
+// ===== View Brand =====
+function viewBrand(index) {
+    const brand = appData.brands[index];
+    if (!brand) return;
+    
+    currentViewingBrandIndex = index;
+    
+    // Populate view modal
+    const coverContainer = document.getElementById('viewBrandCover');
+    if (brand.coverImage) {
+        coverContainer.innerHTML = `<img src="${brand.coverImage}" alt="${brand.brandName}">`;
+    } else {
+        const icon = categoryIcons[brand.brandCategory] || 'fa-briefcase';
+        coverContainer.innerHTML = `<i class="fas ${icon} placeholder-icon"></i>`;
+    }
+    
+    document.getElementById('viewBrandName').textContent = brand.brandName;
+    document.getElementById('viewBrandCategory').textContent = brand.brandCategory || '-';
+    document.getElementById('viewBrandStatus').innerHTML = `<span class="status-badge ${getStatusClass(brand.status)}">${brand.status}</span>`;
+    document.getElementById('viewBrandPocName').textContent = brand.pocName || '-';
+    document.getElementById('viewBrandPocEmail').textContent = brand.pocEmail || '-';
+    document.getElementById('viewBrandPocNumber').textContent = brand.pocNumber || '-';
+    document.getElementById('viewBrandBudget').innerHTML = `<span class="status-badge ${getBudgetClass(brand.budgetStatus)}">${brand.budgetStatus}</span>`;
+    document.getElementById('viewBrandRafPoc').textContent = brand.rafPoc || '-';
+    document.getElementById('viewBrandDate').textContent = formatDate(brand.createdAt);
+    document.getElementById('viewBrandComments').textContent = brand.comments || 'No comments';
+    
+    openModal('viewBrandModal');
+}
+
+// ===== Edit Brand Modal =====
+function openEditBrandModal() {
+    closeModal('viewBrandModal');
+    openEditBrandModalDirect(currentViewingBrandIndex);
+}
+
+function openEditBrandModalDirect(index) {
+    const brand = appData.brands[index];
+    if (!brand) return;
+    
+    currentViewingBrandIndex = index;
+    
+    // Populate RAF POC dropdown
+    const rafPocSelect = document.getElementById('editBrandRafPoc');
+    rafPocSelect.innerHTML = '<option value="">Select RAF POC</option>' +
+        appData.users.map(user => `
+            <option value="${user.name}" ${brand.rafPoc === user.name ? 'selected' : ''}>${user.name}</option>
+        `).join('');
+    
+    // Populate form fields
+    document.getElementById('editBrandId').value = brand.id;
+    document.getElementById('editBrandName').value = brand.brandName;
+    document.getElementById('editBrandCategory').value = brand.brandCategory || '';
+    document.getElementById('editBrandPocName').value = brand.pocName;
+    document.getElementById('editBrandPocEmail').value = brand.pocEmail;
+    document.getElementById('editBrandPocNumber').value = brand.pocNumber;
+    document.getElementById('editBrandBudgetStatus').value = brand.budgetStatus;
+    document.getElementById('editBrandStatus').value = brand.status;
+    document.getElementById('editBrandComments').value = brand.comments || '';
+    document.getElementById('editBrandCoverImage').value = brand.coverImage || '';
+    
+    // Show image preview if exists
+    const imageUploadArea = document.getElementById('editBrandImageUpload');
+    if (brand.coverImage) {
+        imageUploadArea.innerHTML = `
+            <img src="${brand.coverImage}" alt="${brand.brandName}">
+            <div class="upload-placeholder" style="display: none;">
+                <i class="fas fa-image"></i>
+                <p>Click to upload brand cover image</p>
+            </div>
+            <input type="file" id="editBrandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'edit')">
+            <input type="hidden" name="coverImage" id="editBrandCoverImage" value="${brand.coverImage}">
+        `;
+        imageUploadArea.classList.add('has-image');
+    } else {
+        imageUploadArea.innerHTML = `
+            <div class="upload-placeholder">
+                <i class="fas fa-image"></i>
+                <p>Click to upload brand cover image</p>
+            </div>
+            <input type="file" id="editBrandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'edit')">
+            <input type="hidden" name="coverImage" id="editBrandCoverImage">
+        `;
+        imageUploadArea.classList.remove('has-image');
+    }
+    
+    openModal('editBrandModal');
+}
+
+// ===== Update Brand =====
+async function updateBrand() {
+    const index = currentViewingBrandIndex;
+    if (index === null || index === undefined) return;
+    
     const brand = appData.brands[index];
     const oldStatus = brand.status;
-    brand.status = newStatus;
     
-    // Remove from old status table
-    removeFromStatusTable(brand, oldStatus);
+    // Get form values
+    brand.brandName = document.getElementById('editBrandName').value;
+    brand.brandCategory = document.getElementById('editBrandCategory').value;
+    brand.pocName = document.getElementById('editBrandPocName').value;
+    brand.pocEmail = document.getElementById('editBrandPocEmail').value;
+    brand.pocNumber = document.getElementById('editBrandPocNumber').value;
+    brand.rafPoc = document.getElementById('editBrandRafPoc').value;
+    brand.budgetStatus = document.getElementById('editBrandBudgetStatus').value;
+    brand.status = document.getElementById('editBrandStatus').value;
+    brand.comments = document.getElementById('editBrandComments').value;
+    brand.coverImage = document.getElementById('editBrandCoverImage').value;
+    brand.updatedAt = new Date().toISOString();
     
-    // Add to new status table
-    addToStatusTable(brand, newStatus);
+    // Handle status change
+    if (oldStatus !== brand.status) {
+        removeFromStatusTable(brand, oldStatus);
+        addToStatusTable(brand, brand.status);
+    }
     
-    addActivity('status', `<strong>${currentUser.name}</strong> changed <strong>${brand.brandName}</strong> status from ${oldStatus} to ${newStatus}`, 'status');
+    addActivity('brand', `<strong>${currentUser.name}</strong> updated brand: <strong>${brand.brandName}</strong>`, 'brand');
     
     await saveAppData();
     refreshAllData();
     
-    showToast(`${brand.brandName} moved to ${newStatus}`, 'success');
+    closeModal('editBrandModal');
+    showToast(`${brand.brandName} updated successfully`, 'success');
 }
 
-function removeFromStatusTable(brand, status) {
-    let targetArray;
+// ===== Image Upload Functions =====
+function previewBrandImage(event, mode) {
+    const file = event.target.files[0];
+    if (!file) return;
     
-    switch(status) {
-        case 'Hot Brands':
-            targetArray = appData.hotBrands;
-            break;
-        case 'Warm Brands':
-            targetArray = appData.warmBrands;
-            break;
-        case 'Lost Brands':
-            targetArray = appData.lostBrands;
-            break;
-        case 'Converted to Campaign':
-            targetArray = appData.convertedCampaigns;
-            break;
-        default:
+    // Check file size (max 500KB for base64 storage)
+    if (file.size > 500000) {
+        showToast('Image too large. Please use an image under 500KB.', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const base64Image = e.target.result;
+        
+        if (mode === 'add') {
+            document.getElementById('brandCoverImage').value = base64Image;
+            const uploadArea = document.getElementById('brandImageUpload');
+            uploadArea.innerHTML = `
+                <img src="${base64Image}" alt="Preview">
+                <div class="upload-placeholder" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <p>Click to upload brand cover image</p>
+                </div>
+                <input type="file" id="brandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'add')">
+                <input type="hidden" name="coverImage" id="brandCoverImage" value="${base64Image}">
+            `;
+            uploadArea.classList.add('has-image');
+        } else {
+            document.getElementById('editBrandCoverImage').value = base64Image;
+            const uploadArea = document.getElementById('editBrandImageUpload');
+            uploadArea.innerHTML = `
+                <img src="${base64Image}" alt="Preview">
+                <div class="upload-placeholder" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <p>Click to upload brand cover image</p>
+                </div>
+                <input type="file" id="editBrandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'edit')">
+                <input type="hidden" name="coverImage" id="editBrandCoverImage" value="${base64Image}">
+            `;
+            uploadArea.classList.add('has-image');
+        }
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+function triggerImageUpload(index) {
+    currentViewingBrandIndex = index;
+    
+    // Create temporary file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png';
+    
+    input.onchange = async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (file.size > 500000) {
+            showToast('Image too large. Please use an image under 500KB.', 'error');
             return;
-    }
+        }
+        
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            appData.brands[index].coverImage = event.target.result;
+            
+            addActivity('brand', `<strong>${currentUser.name}</strong> updated cover image for <strong>${appData.brands[index].brandName}</strong>`, 'brand');
+            
+            await saveAppData();
+            refreshBrandsGrid();
+            showToast('Cover image updated', 'success');
+        };
+        reader.readAsDataURL(file);
+    };
     
-    const index = targetArray.findIndex(b => b.brandId === brand.id || b.brandName === brand.brandName);
-    if (index > -1) {
-        targetArray.splice(index, 1);
-    }
+    input.click();
 }
 
-function addToStatusTable(brand, status) {
-    const baseData = {
-        brandId: brand.id,
-        brandName: brand.brandName,
-        pocName: brand.pocName,
-        pocEmail: brand.pocEmail,
-        pocNumber: brand.pocNumber,
-        budgetStatus: brand.budgetStatus,
+// ===== Save Brand (Updated) =====
+async function saveBrand() {
+    const form = document.getElementById('addBrandForm');
+    const formData = new FormData(form);
+    
+    const brand = {
+        id: generateId(),
+        brandName: formData.get('brandName'),
+        brandCategory: formData.get('brandCategory'),
+        pocName: formData.get('pocName'),
+        pocEmail: formData.get('pocEmail'),
+        pocNumber: formData.get('pocNumber'),
+        rafPoc: formData.get('rafPoc'),
+        budgetStatus: formData.get('budgetStatus'),
+        status: formData.get('status'),
+        comments: formData.get('comments'),
+        coverImage: document.getElementById('brandCoverImage').value || '',
         createdAt: new Date().toISOString()
     };
     
-    switch(status) {
-        case 'Hot Brands':
-            if (!appData.hotBrands.find(b => b.brandId === brand.id)) {
-                appData.hotBrands.push({
-                    ...baseData,
-                    pipelineStatus: 'Initial Talks',
-                    aflogPoc: '',
-                    hasBrandTool: false,
-                    taskAssignee: '',
-                    comments: ''
-                });
-            }
-            break;
-        case 'Warm Brands':
-            if (!appData.warmBrands.find(b => b.brandId === brand.id)) {
-                appData.warmBrands.push({
-                    ...baseData,
-                    pipelineStatus: 'Initial Talks',
-                    aflogPoc: '',
-                    hasBrandTool: false,
-                    taskAssignee: '',
-                    comments: ''
-                });
-            }
-            break;
-        case 'Lost Brands':
-            if (!appData.lostBrands.find(b => b.brandId === brand.id)) {
-                appData.lostBrands.push({
-                    ...baseData,
-                    lostReason: '',
-                    lostDate: new Date().toISOString()
-                });
-            }
-            break;
-        case 'Converted to Campaign':
-            // Don't auto-add, require campaign name
-            break;
+    appData.brands.push(brand);
+    
+    // Auto-add to respective status table
+    addToStatusTable(brand, brand.status);
+    
+    addActivity('brand', `<strong>${currentUser.name}</strong> added new brand: <strong>${brand.brandName}</strong>`, 'brand');
+    
+    await saveAppData();
+    refreshAllData();
+    
+    // Reset form and image upload area
+    form.reset();
+    const uploadArea = document.getElementById('brandImageUpload');
+    uploadArea.innerHTML = `
+        <div class="upload-placeholder">
+            <i class="fas fa-image"></i>
+            <p>Click to upload brand cover image</p>
+        </div>
+        <input type="file" id="brandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'add')">
+        <input type="hidden" name="coverImage" id="brandCoverImage">
+    `;
+    uploadArea.classList.remove('has-image');
+    
+    closeModal('addBrandModal');
+    
+    showToast(`${brand.brandName} added successfully`, 'success');
+}
+
+// ===== Delete Brand (Updated with access control) =====
+async function deleteBrand(index) {
+    const brand = appData.brands[index];
+    
+    // Check permission
+    const canDelete = currentUser.role === 'admin' || appData.accessControl[currentUser.id + '_delete'] === true;
+    
+    if (!canDelete) {
+        showToast('You do not have permission to delete brands', 'error');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ${brand.brandName}? This will also remove it from all pipeline stages.`)) {
+        // Remove from all status tables
+        removeFromStatusTable(brand, brand.status);
+        
+        // Remove from brands
+        appData.brands.splice(index, 1);
+        
+        addActivity('brand', `<strong>${currentUser.name}</strong> deleted brand: <strong>${brand.brandName}</strong>`, 'brand');
+        
+        await saveAppData();
+        refreshAllData();
+        
+        showToast(`${brand.brandName} deleted`, 'success');
+    }
+}
+
+// ===== Populate RAF POC in Add Brand Modal =====
+function populateBrandDropdowns() {
+    const brandSelects = [
+        'hotBrandSelect',
+        'warmBrandSelect',
+        'convertedBrandSelect'
+    ];
+    
+    brandSelects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Select a brand</option>' +
+            appData.brands.map(brand => `
+                <option value="${brand.id}">${brand.brandName}</option>
+            `).join('');
+    });
+    
+    // Populate RAF POC dropdown in Add Brand modal
+    const addBrandRafPoc = document.getElementById('addBrandRafPoc');
+    if (addBrandRafPoc) {
+        addBrandRafPoc.innerHTML = '<option value="">Select RAF POC</option>' +
+            appData.users.map(user => `
+                <option value="${user.name}">${user.name}</option>
+            `).join('');
     }
 }
 
@@ -3356,3 +3668,4 @@ function getCategoryClass(category) {
 
 // ===== Initialize on page load =====
 console.log('RAF Campaign Tool - App.js Loaded Successfully!');
+
