@@ -307,39 +307,40 @@
                     </div>
                 </div>
             </section>
-                        <!-- ========== BRANDS SECTION ========== -->
+            <!-- ========== BRANDS SECTION ========== -->
             <section class="content-section" id="section-brands">
                 <div class="table-container">
                     <div class="table-header">
-                        <h2>All Brands</h2>
+                        <h2><i class="fas fa-building" style="color: var(--primary-color); margin-right: 8px;"></i> All Brands</h2>
                         <div class="table-actions">
+                            <select id="brandCategoryFilter" onchange="filterBrandsByCategory()">
+                                <option value="">All Categories</option>
+                                <option value="Food">Food</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="FMCG">FMCG</option>
+                                <option value="Tech">Tech</option>
+                                <option value="Fitness">Fitness</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Lifestyle">Lifestyle</option>
+                                <option value="Automobile">Automobile</option>
+                                <option value="Others">Others</option>
+                            </select>
                             <button class="btn btn-primary" onclick="openModal('addBrandModal')">
                                 <i class="fas fa-plus"></i> Add Brand
                             </button>
                         </div>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Brand Name</th>
-                                <th>POC Name</th>
-                                <th>POC Email</th>
-                                <th>POC Number</th>
-                                <th>Budget Status</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="brandsTableBody">
-                            <tr>
-                                <td colspan="7" class="empty-state">
-                                    <p>No brands added yet</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="brand-grid-container" id="brandsGridContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-building"></i>
+                            <h3>No brands added yet</h3>
+                            <p>Add your first brand to get started</p>
+                        </div>
+                    </div>
                 </div>
             </section>
+
 
             <!-- ========== HOT BRANDS SECTION ========== -->
             <section class="content-section" id="section-hot-brands">
@@ -761,24 +762,58 @@
             </div>
             <div class="modal-body">
                 <form id="addBrandForm">
+                    <!-- Image Upload -->
+                    <div class="image-upload-area" id="brandImageUpload" onclick="document.getElementById('brandImageInput').click()">
+                        <div class="upload-placeholder">
+                            <i class="fas fa-image"></i>
+                            <p>Click to upload brand cover image</p>
+                        </div>
+                        <input type="file" id="brandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'add')">
+                        <input type="hidden" name="coverImage" id="brandCoverImage">
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label>Brand Name <span class="required">*</span></label>
                             <input type="text" name="brandName" required>
                         </div>
                         <div class="form-group">
-                            <label>POC Name <span class="required">*</span></label>
-                            <input type="text" name="pocName" required>
+                            <label>Brand Category <span class="required">*</span></label>
+                            <select name="brandCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Food">Food</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="FMCG">FMCG</option>
+                                <option value="Tech">Tech</option>
+                                <option value="Fitness">Fitness</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Lifestyle">Lifestyle</option>
+                                <option value="Automobile">Automobile</option>
+                                <option value="Others">Others</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
+                            <label>POC Name <span class="required">*</span></label>
+                            <input type="text" name="pocName" required>
+                        </div>
+                        <div class="form-group">
                             <label>POC Email <span class="required">*</span></label>
                             <input type="email" name="pocEmail" required>
                         </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group">
                             <label>POC Number <span class="required">*</span></label>
                             <input type="tel" name="pocNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RAF POC <span class="required">*</span></label>
+                            <select name="rafPoc" id="addBrandRafPoc" required>
+                                <option value="">Select RAF POC</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row">
@@ -817,6 +852,169 @@
         </div>
     </div>
 
+    <!-- View Brand Modal -->
+    <div class="modal-overlay" id="viewBrandModal">
+        <div class="modal brand-detail-modal">
+            <div class="brand-detail-header" id="viewBrandCover">
+                <i class="fas fa-building placeholder-icon"></i>
+            </div>
+            <div class="brand-detail-content">
+                <div class="brand-detail-title">
+                    <h2 id="viewBrandName">Brand Name</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="openEditBrandModal()">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="modal-close" onclick="closeModal('viewBrandModal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="brand-detail-grid">
+                    <div class="brand-detail-item">
+                        <label>Brand Category</label>
+                        <p id="viewBrandCategory">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Status</label>
+                        <p id="viewBrandStatus">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Brand POC Name</label>
+                        <p id="viewBrandPocName">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Brand POC Email</label>
+                        <p id="viewBrandPocEmail">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Brand POC Number</label>
+                        <p id="viewBrandPocNumber">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Budget Status</label>
+                        <p id="viewBrandBudget">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>RAF POC</label>
+                        <p id="viewBrandRafPoc">-</p>
+                    </div>
+                    <div class="brand-detail-item">
+                        <label>Added On</label>
+                        <p id="viewBrandDate">-</p>
+                    </div>
+                    <div class="brand-detail-item full-width">
+                        <label>Notes / Comments</label>
+                        <p id="viewBrandComments">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Brand Modal -->
+    <div class="modal-overlay" id="editBrandModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Edit Brand</h2>
+                <button class="modal-close" onclick="closeModal('editBrandModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editBrandForm">
+                    <input type="hidden" name="brandId" id="editBrandId">
+                    
+                    <!-- Image Upload -->
+                    <div class="image-upload-area" id="editBrandImageUpload" onclick="document.getElementById('editBrandImageInput').click()">
+                        <div class="upload-placeholder">
+                            <i class="fas fa-image"></i>
+                            <p>Click to upload brand cover image</p>
+                        </div>
+                        <input type="file" id="editBrandImageInput" accept="image/jpeg,image/png" onchange="previewBrandImage(event, 'edit')">
+                        <input type="hidden" name="coverImage" id="editBrandCoverImage">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Brand Name <span class="required">*</span></label>
+                            <input type="text" name="brandName" id="editBrandName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Brand Category <span class="required">*</span></label>
+                            <select name="brandCategory" id="editBrandCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="Food">Food</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="FMCG">FMCG</option>
+                                <option value="Tech">Tech</option>
+                                <option value="Fitness">Fitness</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Beauty">Beauty</option>
+                                <option value="Lifestyle">Lifestyle</option>
+                                <option value="Automobile">Automobile</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>POC Name <span class="required">*</span></label>
+                            <input type="text" name="pocName" id="editBrandPocName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>POC Email <span class="required">*</span></label>
+                            <input type="email" name="pocEmail" id="editBrandPocEmail" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>POC Number <span class="required">*</span></label>
+                            <input type="tel" name="pocNumber" id="editBrandPocNumber" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RAF POC <span class="required">*</span></label>
+                            <select name="rafPoc" id="editBrandRafPoc" required>
+                                <option value="">Select RAF POC</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Budget Status <span class="required">*</span></label>
+                            <select name="budgetStatus" id="editBrandBudgetStatus" required>
+                                <option value="">Select Budget</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status <span class="required">*</span></label>
+                            <select name="status" id="editBrandStatus" required>
+                                <option value="">Select Status</option>
+                                <option value="Hot Brands">Hot Brands</option>
+                                <option value="Warm Brands">Warm Brands</option>
+                                <option value="Lost Brands">Lost Brands</option>
+                                <option value="Converted to Campaign">Converted to Campaign</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes / Comments</label>
+                        <textarea name="comments" id="editBrandComments" rows="3" placeholder="Any additional notes..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editBrandModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="updateBrand()">
+                    <i class="fas fa-save"></i> Update Brand
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Add Task Modal -->
     <div class="modal-overlay" id="addTaskModal">
         <div class="modal">
@@ -1607,3 +1805,4 @@
     <script src="js/app.js"></script>
 </body>
 </html>
+
